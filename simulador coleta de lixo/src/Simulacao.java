@@ -1,9 +1,12 @@
+import java.sql.Time;
 import java.util.Random;
 public class Simulacao {
    public Cidade teresina;
    public EstacaoTransferencia estacao_transferencia_a;
    public EstacaoTransferencia estacao_transferencia_b;
    public int hora_atual;
+   //criar um timer
+
 
 
 
@@ -13,7 +16,8 @@ public class Simulacao {
     this.criarZonas(5, 20, 30);
     this.zonaEstacoes();
     this.inicializarCaminhoes(qtd_pequenos_2, qtd_pequenos_4,  qtd_pequenos_8, qtd_pequenos_10, qtd_grandes, qtd_viagens);
-    hora_atual = 0; 
+    hora_atual = 0;
+    //instanciar o timer
 
 
 
@@ -190,6 +194,7 @@ public void executar() {
     teresina.imprimeListaEstacoes();
     teresina.imprimeListaCaminhaoGrande();
     teresina.imprimeListaCaminhaoPequeno();
+    // iniciar o timer e fazer com que ele imprima os dados a cada segundo
   
  
 

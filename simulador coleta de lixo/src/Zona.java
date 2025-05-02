@@ -1,26 +1,32 @@
+import java.sql.Time;
+
 public class Zona {
     public String nome; 
     public int lixo_minimo;
     public int lixo_maximo; //com esses atributos, eu posso gerar uma quantidade aleatória de lixo pra zona
-    public int tempo_viagem_pico;
-    public int tempo_viagem_normal;
+    public Time tempo_min_viagem_pico, tempo_max_viagem_pico, tempo_min_viagem_normal, tempo_max_viagem_normal; //5:12
     public int lixo_zona;
     public EstacaoTransferencia estacao_descarga;
-    public int tempo_viagem_estacao_normal;
-    public int tempo_viagem_estacao_pico;
+    public Time tempo_viagem_estacao_normal;
+    public Time tempo_viagem_estacao_pico;
  
     // todo
     //public EstacaoTransferencia estacao_descarga;
 
-    public Zona(String nome, int lixo_minimo, int lixo_maximo, int tempo_viagem_pico, int tempo_viagem_normal, EstacaoTransferencia estacao_descarga, int tempo_viagem_estacao_normal, int tempo_viagem_estacao_pico){ 
+    public Zona(String nome, int lixo_minimo, int lixo_maximo, Time tempo_min_viagem_pico, Time tempo_max_viagem_normal, 
+    Time tempo_min_viagem_normal, Time tempo_max_viagem_pico, EstacaoTransferencia estacao_descarga, 
+    Time tempo_viagem_estacao_normal, Time tempo_viagem_estacao_pico){ 
         this.lixo_maximo = lixo_maximo;
         this.lixo_minimo = lixo_minimo;
-        this.tempo_viagem_normal =tempo_viagem_normal; 
-        this.tempo_viagem_pico = tempo_viagem_pico;
+        this.tempo_max_viagem_normal =tempo_max_viagem_normal;
+        this.tempo_min_viagem_normal =tempo_min_viagem_normal; 
+        this.tempo_max_viagem_pico = tempo_max_viagem_pico;
+        this.tempo_min_viagem_pico = tempo_min_viagem_pico;
         this.nome = nome;
         this.estacao_descarga = estacao_descarga;
         this.tempo_viagem_estacao_normal = tempo_viagem_estacao_normal;
-        this.tempo_viagem_estacao_pico = tempo_viagem_estacao_pico;        lixo_zona = 0; 
+        this.tempo_viagem_estacao_pico = tempo_viagem_estacao_pico;        
+        lixo_zona = 0; 
     }
 
 public int getLixo_maximo() {
@@ -38,15 +44,6 @@ public int getLixo_zona() {
 public String getNome() {
         return nome;
     }
-
-public int getTempo_viagem_normal() {
-        return tempo_viagem_normal;
-    }
-
-public int getTempo_viagem_pico() {
-        return tempo_viagem_pico;
-    }
-
     
 
     @Override

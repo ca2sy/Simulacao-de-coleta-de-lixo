@@ -1,3 +1,5 @@
+import java.sql.Time;
+
 public class Cidade {
     public ListaEncadeada<Zona> zonas = new ListaEncadeada<Zona>(); //lista de zonas que a cidade vai ter
     public ListaEncadeada<CaminhaoPequeno> caminhoes_pequenos = new ListaEncadeada<CaminhaoPequeno>();
