@@ -1,5 +1,5 @@
 public class Fila<T> {
-    private static class No<T> {
+    public static class No<T> {
         T dado;
         No<T> prox;
 
@@ -66,7 +66,19 @@ public class Fila<T> {
 
     }
 
-    public int tamanho() {
+    public int getTamanho() {
         return tamanho;
     }
+
+    public boolean contem(T elemento) {
+        No<T> atual = head;
+        while (atual != null) {
+            if (atual.dado.equals(elemento)) {
+                return true;
+            }
+            atual = atual.prox;
+        }
+        return false;
+    }
+    
 }
