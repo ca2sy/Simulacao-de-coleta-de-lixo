@@ -4,17 +4,20 @@ public class CaminhaoPequeno {
     public Fila<Zona> zonas_de_atuacao;
     public String id_caminhao_pequeno;
     public int num_viagens_realizadas;
+    public int num_viagens_a_realizar;
+    public Zona zona_atual;
 
     public long tempoEsperadoEmMs; 
     public static final long tempo_max_espera_ms = 20 * 60 * 1000; // 20 minutos em milissegundos
 
-    public CaminhaoPequeno(int capacidade, Fila<Zona> zonas_de_atuacao, String id_caminhao_pequeno) {
+    public CaminhaoPequeno(int capacidade, Fila<Zona> zonas_de_atuacao, String id_caminhao_pequeno, int numeros_viagem_a_realizar) {
         this.capacidade = capacidade;
         this.zonas_de_atuacao = zonas_de_atuacao;
         this.carga_atual = 0;
         this.id_caminhao_pequeno = id_caminhao_pequeno;
         this.num_viagens_realizadas = 0;
         this.tempoEsperadoEmMs = 0;
+        this.num_viagens_a_realizar = numeros_viagem_a_realizar;
     }
 
     public int getCapacidade() {
