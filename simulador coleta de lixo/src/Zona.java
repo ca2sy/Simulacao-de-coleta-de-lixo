@@ -4,9 +4,11 @@ public class Zona {
     public int lixo_maximo; // com esses atributos, você pode gerar uma quantidade aleatória de lixo para a zona
     public long tempo_min_viagem_pico, tempo_max_viagem_pico, tempo_min_viagem_normal, tempo_max_viagem_normal; // Tempo em milissegundos
     public int lixo_zona;
+    public int lixo_atual;
     public EstacaoTransferencia estacao_descarga;
     public long tempo_viagem_estacao_normal;
     public long tempo_viagem_estacao_pico;
+
 
     public Zona(String nome, int lixo_minimo, int lixo_maximo, long tempo_min_viagem_pico, long tempo_max_viagem_pico, long tempo_min_viagem_normal, long tempo_max_viagem_normal,EstacaoTransferencia estacao_descarga, long tempo_viagem_estacao_normal, long tempo_viagem_estacao_pico) {
         this.lixo_maximo = lixo_maximo;

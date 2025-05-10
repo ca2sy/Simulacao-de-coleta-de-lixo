@@ -1,19 +1,23 @@
 public class CaminhaoGrande {
 
-    public static final int capacidade_maxima = 20; 
-    public static final long tolerancia_em_ms = 40 * 60 * 1000; 
-
+    public  int capacidade_maxima = 20; 
+    public  long tolerancia_em_ms = 40 * 60 * 1000; 
     public int carga_atual; 
     public String id_caminhao_grande; 
+    public long tempoEsperadoEmMs; 
+    public EstacaoTransferencia estacao_atual; 
+    public int espaco;
+    public boolean emViagemAoAterro = false;
+    public long tempoRestanteViagem = 0;
+    public EstacaoTransferencia estacaoOrigem;
+    public boolean coletando;
+    public boolean estaNoAterro;
 
-    private long tempoEsperadoEmMs; 
-  
 
-    private EstacaoTransferencia estacao_atual; 
-
-    public CaminhaoGrande(String id_caminhao_grande) {
+    public CaminhaoGrande(String id_caminhao_grande, EstacaoTransferencia estacaoOrigem) {
         this.carga_atual = 0;
         this.tempoEsperadoEmMs = 0;
+        this.estacaoOrigem = estacaoOrigem;
         
         this.id_caminhao_grande = id_caminhao_grande;
         this.estacao_atual = null;
@@ -23,7 +27,7 @@ public class CaminhaoGrande {
         return id_caminhao_grande;
     }
 
-    public static int getCapacidademaxima() {
+    public int getCapacidademaxima() {
         return capacidade_maxima;
     }
 
@@ -60,15 +64,18 @@ public class CaminhaoGrande {
         }
     }
 
-    public int receberLixo(int quantidade) {
-        int espaco_disponivel = capacidade_maxima - carga_atual;
-        int lixo_carregado = Math.min(quantidade, espaco_disponivel);
-        carga_atual += lixo_carregado;
+ public void receberLixo(int quantidade) {
+    carga_atual += quantidade;
 
-        System.out.println("Caminhão " + id_caminhao_grande + " carregou " + lixo_carregado + " toneladas. Carga atual: " + carga_atual + " toneladas.");
+    System.out.println("Caminhão " + id_caminhao_grande + " carregou " + quantidade + " toneladas. Carga atual: " + carga_atual + " toneladas.");
 
-        return lixo_carregado;
+    
+    if (carga_atual >= 20) {
+        System.out.println("Caminhão " + id_caminhao_grande + " atingiu a carga máxima de 20 toneladas e irá para o aterro.");
+        descargaNoAterro(); 
     }
+}
+
 
     public void descargaNoAterro() {
         int lixo_descarregado = carga_atual;
@@ -84,4 +91,25 @@ public class CaminhaoGrande {
         this.tempoEsperadoEmMs = 0;
         System.out.println("Caminhão " + id_caminhao_grande + " foi para " + estacao.getNome() + ".");
     }
+
+    public void iniciarViagemAoAterro(EstacaoTransferencia estacao, boolean horarioPico) {
+        this.emViagemAoAterro = true;
+        this.estaNoAterro = false;
+        this.estacaoOrigem = estacao;
+        this.tempoRestanteViagem = horarioPico ? 
+            estacao.tempo_viagem_aterro_pico : 
+            estacao.tempo_viagem_aterro_normal;
+    }
+    
+    
+    public void finalizarViagem() {
+        this.emViagemAoAterro = false;
+        this.espaco = capacidade_maxima; // Reset da capacidade ao voltar
+        System.out.println("Caminhão " + id_caminhao_grande + " voltou do aterro para " + estacaoOrigem.getNome());
+        estacaoOrigem.adicionarCaminhaoGrande(this); // Volta para a fila da estação
+    }
+
+ 
+
 }
+
