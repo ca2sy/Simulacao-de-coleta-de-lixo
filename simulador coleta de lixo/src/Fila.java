@@ -1,3 +1,7 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
+
 public class Fila<T> {
     public static class No<T> {
         T dado;
@@ -9,6 +13,7 @@ public class Fila<T> {
         }
     }
 
+    private List<T> listaInterna = new ArrayList<>();
     public No<T> head;
     public No<T> tail;
     public int tamanho;
@@ -57,7 +62,7 @@ public class Fila<T> {
     public String listaString() {
         String r = "";
         No<T> atual = this.head;
-        while (atual != null){
+        while (atual != null) {
             r = r + " >> " + atual.dado.toString();
             atual = atual.prox;
         }
@@ -80,5 +85,5 @@ public class Fila<T> {
         }
         return false;
     }
-    
+
 }

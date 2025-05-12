@@ -32,7 +32,8 @@ public class ListaEncadeada<T> {
     }
 
     public boolean remover(T elemento) {
-        if (head == null) return false;
+        if (head == null)
+            return false;
 
         if (head.dado.equals(elemento)) {
             head = head.prox;
@@ -45,7 +46,8 @@ public class ListaEncadeada<T> {
             atual = atual.prox;
         }
 
-        if (atual.prox == null) return false;
+        if (atual.prox == null)
+            return false;
 
         atual.prox = atual.prox.prox;
         tamanho--;
@@ -55,7 +57,8 @@ public class ListaEncadeada<T> {
     public boolean contem(T elemento) {
         No<T> atual = head;
         while (atual != null) {
-            if (atual.dado.equals(elemento)) return true;
+            if (atual.dado.equals(elemento))
+                return true;
             atual = atual.prox;
         }
         return false;

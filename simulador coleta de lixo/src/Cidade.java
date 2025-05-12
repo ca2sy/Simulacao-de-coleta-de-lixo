@@ -1,38 +1,47 @@
 public class Cidade {
     public ListaEncadeada<Zona> zonas = new ListaEncadeada<>();
     public ListaEncadeada<CaminhaoPequeno> caminhoes_pequenos = new ListaEncadeada<>();
-    public ListaEncadeada<CaminhaoGrande> caminhoes_grandes  = new ListaEncadeada<>();
+    public ListaEncadeada<CaminhaoGrande> caminhoes_grandes = new ListaEncadeada<>();
     public ListaEncadeada<EstacaoTransferencia> estacoes_transferencia = new ListaEncadeada<>();
 
     // Horários de pico em horas
-    public static final int horario_pico_inicio1 = 12;
-    public static final int horario_pico_fim1 = 14;
-    public static final int horario_pico_inicio2 = 18;
-    public static final int horario_pico_fim2 = 20;
+    public int horario_pico_inicio1 = 12;
+    public int horario_pico_fim1 = 14;
+    public int horario_pico_inicio2 = 18;
+    public int horario_pico_fim2 = 20;
 
     // Tempo da simulação em milissegundos
     private long tempoGlobalEmMs = 0;
 
-    public Cidade() {}
+    public Cidade() {
+    }
 
-    // Método que avança o tempo da cidade (ex: 1 min real = 1 min simulado = 60_000ms)
-    public void avancarTempo(long milissegundos) {
+    // Método que avança o tempo da cidade
+    public void avancarTempoEmMinutos(long minutos) {
+        // Converte minutos para milissegundos
+        long milissegundos = minutos * 60 * 1000;
         tempoGlobalEmMs += milissegundos;
     }
 
-    // Converte tempo atual em horas (0 a 23)
     public int getHoraAtualSimulada() {
         long totalSegundos = tempoGlobalEmMs / 1000;
-        long minutos = totalSegundos / 60;
-        long horas = (minutos / 60) % 24;
+        long minutosTotais = totalSegundos / 60; // Total de minutos
+        long horas = (minutosTotais / 60) % 24;
         return (int) horas;
+    }
+
+    // Retorna o minuto atual simulada (0 a 59)
+    public int getMinutoAtualSimulado() {
+        long totalSegundos = tempoGlobalEmMs / 1000;
+        long minutosTotais = totalSegundos / 60;
+        return (int) (minutosTotais % 60);
     }
 
     // Verifica se a hora atual simulada está em horário de pico
     public boolean estaEmHorarioPico() {
         int horaAtual = getHoraAtualSimulada();
         return (horaAtual >= horario_pico_inicio1 && horaAtual <= horario_pico_fim1)
-            || (horaAtual >= horario_pico_inicio2 && horaAtual <= horario_pico_fim2);
+                || (horaAtual >= horario_pico_inicio2 && horaAtual <= horario_pico_fim2);
     }
 
     public void imprimeListaEstacoes() {
@@ -73,8 +82,10 @@ public class Cidade {
             System.out.println(atual.dado.getNome());
             System.out.println("Lixo da zona: " + atual.dado.lixo_zona);
             System.out.println("Descarrega seu lixo na " + atual.dado.estacao_descarga.nome);
-            System.out.println("Tempo de viagem em horário normal: " + atual.dado.tempo_viagem_estacao_normal + " minutos");
-            System.out.println("Tempo de viagem em horário de pico: " + atual.dado.tempo_viagem_estacao_pico + " minutos");
+            System.out.println(
+                    "Tempo de viagem em horário normal: " + atual.dado.tempo_viagem_estacao_normal + " minutos");
+            System.out.println(
+                    "Tempo de viagem em horário de pico: " + atual.dado.tempo_viagem_estacao_pico + " minutos");
             System.out.println("");
             atual = atual.prox;
         }
