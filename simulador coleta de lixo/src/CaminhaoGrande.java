@@ -8,7 +8,7 @@ public class CaminhaoGrande {
     public String id_caminhao_grande;
 
     // Variáveis de tempo
-    public int tolerancia_minutos = 10;
+    public int tolerancia_minutos = 30;
     public int tempo_inicio_espera = 0; 
     public int tempo_espera_acumulado = 0; 
     public int tempo_restante_viagem = 0;

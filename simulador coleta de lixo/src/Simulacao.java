@@ -161,8 +161,8 @@ public class Simulacao {
 
             Zona z = new Zona(
                     "Zona " + i,
-                    2, // lixo_minimo 120 //pra teste por 82 toneladas ou 600?
-                    2, // lixo_maximo
+                    120, // lixo_minimo 120 //pra teste por 82 toneladas ou 600?
+                    120, // lixo_maximo
                     tempo_min_viagem_normal, // tempo_min_viagem_pico
                     tempo_max_viagem_normal, // tempo_max_viagem_pico
                     tempo_min_viagem_normal, // tempo_min_viagem_normal
@@ -436,6 +436,7 @@ public class Simulacao {
                         // aqui a coleta vai acontecer
                         CaminhaoGrande caminhaoGrande = caminhaoPequeno.estacao_atual.fila_caminhao_grande.espiar();
                         caminhaoGrande.tempo_espera_acumulado = 0;
+                        caminhaoGrande.tempo_inicio_espera = 0;
                         int quantidadeLiberada = Math.min(caminhaoPequeno.carga_atual, caminhaoGrande.espaco);
                         totalLixoTransferido += quantidadeLiberada;
                         caminhaoPequeno.liberarCarga(caminhaoGrande);
@@ -733,6 +734,8 @@ public class Simulacao {
                         " completou viagem de volta em " + caminhao.tempo_viagem_retorno + " minutos");
                 caminhao.tempo_viagem_retorno = 0;
                 caminhao.estacao.fila_caminhao_grande.enfileirar(caminhao);
+                caminhao.tempo_espera_acumulado = 0;
+                caminhao.tempo_inicio_espera = 0;
 
             }
         }
