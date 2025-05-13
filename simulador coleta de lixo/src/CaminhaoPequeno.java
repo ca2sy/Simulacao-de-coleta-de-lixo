@@ -6,7 +6,7 @@ public class CaminhaoPequeno {
     // Atributos de operação
     public Fila<Zona> zonas_de_atuacao;
     public Zona zona_atual;
-    public boolean esta_coletando;
+   
 
     // Atributos de identificação
     public String id_caminhao_pequeno;
@@ -19,14 +19,24 @@ public class CaminhaoPequeno {
     // zona a ir
 
     public Zona zona_a_ir;
+    
 
     // Atributos de estação
-    public EstacaoTransferencia estacao_a_ir;
+    public EstacaoTransferencia estacao_a_ir; //estação q ta indo
     public EstacaoTransferencia estacao_atual;
+
     
     //controle
 
     public boolean esta_na_estacao = false;
+    public boolean esta_na_zona = false;
+    public boolean coletou = false;
+    public boolean vai_coletar = true;
+    public boolean esta_indo_pra_estacao = false;
+    public boolean esta_indo_pra_zona;
+    
+
+    public boolean esta_coletando;
 
     // Atributos de tempo (em minutos)
     public int tempo_restante_viagem;
@@ -73,17 +83,15 @@ public class CaminhaoPequeno {
         if (quantidadeLiberada > carga_atual) {
             quantidadeLiberada = carga_atual;
         }
-
         carga_atual -= quantidadeLiberada;
         caminhaoGrande.receberLixo(quantidadeLiberada);
-
-        System.out.println("Caminhão " + id_caminhao_pequeno + " reduziu sua carga em " + quantidadeLiberada +
-                " toneladas. Carga restante: " + carga_atual + " toneladas.");
+        
     }
 
     public void coletarLixo(int quantidade) {
         int espaco_disponivel = capacidade - carga_atual;
-        carga_atual += Math.min(quantidade, espaco_disponivel);
+         carga_atual += Math.min(quantidade, espaco_disponivel);
+       
     }
 
     public boolean tempoMaximoEsperado() {

@@ -112,17 +112,9 @@ public class InterfaceSimulacao extends JFrame {
     private void atualizarEstatisticas() {
         statsPanel.removeAll();
 
-        // Cálculo das médias
-        double mediaViagemPequenos = simulacao.totalViagensPequenos > 0
-                ? (double) simulacao.somaTemposViagemPequenos / simulacao.totalViagensPequenos
-                : 0;
 
-        double mediaViagemGrandes = simulacao.totalViagensGrandes > 0
-                ? (double) simulacao.somaTemposViagemGrandes / simulacao.totalViagensGrandes
-                : 0;
-
-        double mediaEsperaPequenos = simulacao.totalAtendimentosEstacoes > 0
-                ? (double) simulacao.somaTemposEsperaPequenos / simulacao.totalAtendimentosEstacoes
+        double mediaEsperaPequenos = simulacao.teresina.caminhoes_pequenos.tamanho > 0
+                ? (double) simulacao.somaTemposEsperaPequenos / simulacao.teresina.caminhoes_pequenos.tamanho
                 : 0;
 
         // Adiciona todas as estatísticas
@@ -130,17 +122,8 @@ public class InterfaceSimulacao extends JFrame {
         statsPanel.add(new JLabel(String.format("%02d:%02d",
                 simulacao.minutosSimulados / 60, simulacao.minutosSimulados % 60)));
 
-        statsPanel.add(new JLabel("Média viagem pequenos:"));
-        statsPanel.add(new JLabel(String.format("%.1f min", mediaViagemPequenos)));
-
-        statsPanel.add(new JLabel("Média viagem grandes:"));
-        statsPanel.add(new JLabel(String.format("%.1f min", mediaViagemGrandes)));
-
         statsPanel.add(new JLabel("Média espera pequenos:"));
         statsPanel.add(new JLabel(String.format("%.1f min", mediaEsperaPequenos)));
-
-        statsPanel.add(new JLabel("Máximo espera pequenos:"));
-        statsPanel.add(new JLabel(simulacao.maxTempoEsperaPequenos + " min"));
 
         statsPanel.add(new JLabel("Caminhões grandes:"));
         statsPanel.add(new JLabel(simulacao.totalCaminhoesGrandesAdicionados + " adicionados"));
@@ -166,16 +149,10 @@ public class InterfaceSimulacao extends JFrame {
 
     private void mostrarEstatisticasCompletas() {
         // Cálculo das médias
-        double mediaViagemPequenos = simulacao.totalViagensPequenos > 0
-                ? (double) simulacao.somaTemposViagemPequenos / simulacao.totalViagensPequenos
-                : 0;
+      
 
-        double mediaViagemGrandes = simulacao.totalViagensGrandes > 0
-                ? (double) simulacao.somaTemposViagemGrandes / simulacao.totalViagensGrandes
-                : 0;
-
-        double mediaEsperaPequenos = simulacao.totalAtendimentosEstacoes > 0
-                ? (double) simulacao.somaTemposEsperaPequenos / simulacao.totalAtendimentosEstacoes
+         double mediaEsperaPequenos = simulacao.teresina.caminhoes_pequenos.tamanho > 0
+                ? (double) simulacao.somaTemposEsperaPequenos / simulacao.teresina.caminhoes_pequenos.tamanho
                 : 0;
 
         StringBuilder stats = new StringBuilder();
@@ -185,10 +162,8 @@ public class InterfaceSimulacao extends JFrame {
                 .append(String.format("%02d:%02d", simulacao.minutosSimulados / 60, simulacao.minutosSimulados % 60))
                 .append("\n");
 
-        stats.append(String.format("- Tempo médio de viagem (pequenos): %.1f min\n", mediaViagemPequenos));
-        stats.append(String.format("- Tempo médio ao aterro (grandes): %.1f min\n", mediaViagemGrandes));
+    
         stats.append(String.format("- Tempo médio de espera (pequenos): %.1f min\n", mediaEsperaPequenos));
-        stats.append("- Máximo tempo de espera: ").append(simulacao.maxTempoEsperaPequenos).append(" min\n");
         stats.append("- Caminhões grandes adicionados: ").append(simulacao.totalCaminhoesGrandesAdicionados)
                 .append("\n");
         stats.append("- Lixo coletado total: ").append(simulacao.totalLixoColetado).append(" ton\n");

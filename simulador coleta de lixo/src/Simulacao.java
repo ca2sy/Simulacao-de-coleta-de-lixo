@@ -19,16 +19,12 @@ public class Simulacao {
     final long MINUTOS_POR_DIA = 24 * 60;
 
     // variaveis pra guardar estatisticas
-
+    public int coletasRealizadas = 0;
     public int totalCaminhoesGrandesAdicionados = 0;
     public int totalLixoColetado = 0;
-    public int somaTemposViagemPequenos = 0;
-    public int somaTemposViagemGrandes = 0;
     public int totalViagensPequenos = 0;
     public int totalViagensGrandes = 0;
-    public int maxTempoEsperaPequenos = 0;
     public int somaTemposEsperaPequenos = 0;
-    public int totalAtendimentosEstacoes = 0;
     public int totalLixoTransferido = 0;
     public int totalLixoDescarregado = 0;
 
@@ -76,16 +72,17 @@ public class Simulacao {
                     teresina.avancarTempoEmMinutos(1); // 1 minuto
 
                     // chamando meus metodos
+
                     verificarCaminhoesPequenosEncerraram();
                     verificarCaminhoesPequenosComecando();
                     caminhaoPequenoColeta();
                     caminhaoPequenoIrPraEstacao();
-                    atualizarMovimentoCaminhoes();
                     processarCaminhoesPequenos();
                     adicionarCaminhaoGrande();
                     caminhaoPequenoVoltarColeta();
-                    processarCaminhoesGrandes();
+                    processarCaminhoesGrandes(); // PROBLEMA AQU (TIMER NAO ANDA)
                     CaminhoesChegamAoAterro();
+                    atualizarMovimentoCaminhoesPequenos();
                     atualizarViagensAoAterro();
 
                     // 1. verificar quais caminhões pequenos encerraram suas atividades (FEITO)
@@ -164,8 +161,8 @@ public class Simulacao {
 
             Zona z = new Zona(
                     "Zona " + i,
-                    50, // lixo_minimo
-                    90, // lixo_maximo
+                    2, // lixo_minimo 120 //pra teste por 82 toneladas ou 600?
+                    2, // lixo_maximo
                     tempo_min_viagem_normal, // tempo_min_viagem_pico
                     tempo_max_viagem_normal, // tempo_max_viagem_pico
                     tempo_min_viagem_normal, // tempo_min_viagem_normal
@@ -286,43 +283,48 @@ public class Simulacao {
         ListaEncadeada.No<CaminhaoPequeno> atual = teresina.caminhoes_pequenos.head;
         while (atual != null) {
             CaminhaoPequeno caminhao = atual.dado;
-            ListaEncadeada.No<CaminhaoPequeno> proximo = atual.prox;
+            if (caminhao.zonas_de_atuacao.head == null && caminhao.carga_atual == 0 && caminhao.zona_a_ir == null) {
+                // caso o caminhao nao tenha mais zonas pra ir e nao tenha mais carga (pq se
+                // tivesse era pra ir pra estção), ele para
 
-            // se o caminhao nao tiver zonas pra coletar, se ele nao tiver indo pra nenhuma
-            // estação e a carga tiver zerada, o caminhao nao tem mais trabalho
-            boolean terminouTrabalho = (caminhao.zonas_de_atuacao == null || caminhao.zonas_de_atuacao.estaVazia()) &&
-                    (caminhao.estacao_atual == null) &&
-                    (caminhao.carga_atual == 0);
-
-            if (terminouTrabalho) {
-                System.out.println("\n[CAMINHÃO PEQUENO PARANDO] Caminhão " + caminhao.id_caminhao_pequeno +
-                        " completou todas as coletas e descargas. Saindo da simulação.");
+                System.out.println("\n[CAMINHÃO PEQUENO PARANDO] Caminhão " + caminhao.id_caminhao_pequeno
+                        + " completou todas as coletas e descargas. Saindo da simulação.");
+                System.out.println("");
                 teresina.caminhoes_pequenos.remover(caminhao);
-            }
-
-            atual = proximo;
-        }
-    }
-
-    public void verificarCaminhoesPequenosComecando() {
-        ListaEncadeada.No<CaminhaoPequeno> atual = teresina.caminhoes_pequenos.head;
-        while (atual != null) {
-
-            // caso o numero de viagens realizadas for 0, ele começa em uma zona. como
-            // teoricamente ele foi pra aquela zona de algum lugar, eu ja aumento aqui o
-            // numero de viagens.
-            if (atual.dado.num_viagens_realizadas == 0 && atual.dado.zonas_de_atuacao != null
-                    && atual.dado.zonas_de_atuacao.head != null) {
-                System.out.println("[CAMINHÃO PEQUENO COMEÇANDO] Caminhão " + atual.dado.id_caminhao_pequeno
-                        + "Está começando agora na zona " + atual.dado.zonas_de_atuacao.head.dado.getNome() + ".");
-                atual.dado.num_viagens_realizadas++;
-                atual.dado.esta_coletando = true;
-                atual.dado.zona_atual = atual.dado.zonas_de_atuacao.head.dado;
             }
             atual = atual.prox;
         }
+    } // Nao funciona
 
-    }
+    // aqui eu vejo que caminhoes acabaram de começar
+
+    public void verificarCaminhoesPequenosComecando() {
+        if (teresina.caminhoes_pequenos != null) {
+
+            ListaEncadeada.No<CaminhaoPequeno> atual = teresina.caminhoes_pequenos.head;
+            while (atual != null) {
+
+                // caso o numero de viagens realizadas for 0, ele começa em uma zona. como
+                // teoricamente ele foi pra aquela zona de algum lugar, eu ja aumento aqui o
+                // numero de viagens.
+                CaminhaoPequeno caminhao = atual.dado;
+                if (caminhao.num_viagens_realizadas == 0) {
+                    System.out.println("[CAMINHÃO PEQUENO COMEÇANDO] Caminhão " + atual.dado.id_caminhao_pequeno
+                            + "Está começando agora na zona " + atual.dado.zonas_de_atuacao.head.dado.getNome() + ".");
+                    System.out.println(" ");
+                    caminhao.num_viagens_realizadas++; // aumenta o numero de viagens
+                    caminhao.esta_coletando = true; // ele começa automaticamente coletando
+                    caminhao.zona_atual = atual.dado.zonas_de_atuacao.head.dado; // a zona que ele ta atendendo
+                                                                                 // atualmente
+                                                                                 // (ate ela ficar sem lixo)
+                    caminhao.esta_na_zona = true; // como ele começou agora, ele esta na zona agora. é como se ele
+                                                  // tivesse
+                                                  // acabado de chegar
+                }
+                atual = atual.prox;
+            }
+        }
+    } // Funciona
 
     // Aqui é onde o caminhão de fato coleta o lixo da zona atual
     // Primeiro eu vejo o quanto de carga ele ainda pode receber e quanto lixo tem
@@ -333,420 +335,428 @@ public class Simulacao {
     // voltar
 
     public void caminhaoPequenoColeta() {
-        ListaEncadeada.No<CaminhaoPequeno> atual = teresina.caminhoes_pequenos.head;
-        while (atual != null) {
-            CaminhaoPequeno caminhao = atual.dado;
+        if (teresina.caminhoes_pequenos != null) {
 
-            // se ele tiver uma zona atual e estiver coletando, ele vai coletar. ele so deve coletar se o tempo de viagem dele restante for zero (chegou a zona)
-            if (caminhao.zona_atual != null && caminhao.esta_coletando  && caminhao.tempo_restante_viagem == 0) {
-                int capacidadeRestante = caminhao.capacidade - caminhao.carga_atual;
-                int lixoDisponivel = caminhao.zona_atual.lixo_atual;
+            ListaEncadeada.No<CaminhaoPequeno> atual = teresina.caminhoes_pequenos.head;
+            while (atual != null) {
+                CaminhaoPequeno caminhao = atual.dado;
 
-                // pega o minimo dos dois. se uma zona tiver menos lixo doq o caminhao pode
-                // carregar, o caminhao vai recolher o lixo e ir por na estação. caso a zona
-                // tenha mais lixo, o caminhao so vai pegar oq pode carregar
-                int quantidadeColetada = Math.min(capacidadeRestante, lixoDisponivel);
+                // se o caminhao estiver em uma zona, ele pode coletar.
+                if (caminhao.esta_na_zona && caminhao.zona_atual != null && caminhao.coletou == false) {
 
-                if (quantidadeColetada > 0) {
+                    caminhao.esta_coletando = true;
+                    int espaco_disponivel = caminhao.capacidade - caminhao.carga_atual;
+                    int quantidadeColetada = caminhao.zona_atual.LixoColetado(espaco_disponivel);
                     caminhao.coletarLixo(quantidadeColetada);
-                    caminhao.zona_atual.LixoColetado(quantidadeColetada);
+                    System.out.println("[COLETA DE LIXO] Caminhão " + caminhao.id_caminhao_pequeno + " coletou "
+                            + quantidadeColetada + " toneladas na  " + caminhao.zona_atual.getNome());
+                    System.out.println("[STATUS ZONA] Lixo restante na zona " + caminhao.zona_atual.getNome() + ": "
+                            + caminhao.zona_atual.lixo_atual + " toneladas");
+                    System.out.println(" ");
+                    caminhao.esta_coletando = false;
+                    caminhao.vai_coletar = false;
+                    caminhao.coletou = true; // caminhao coletou, esta pronto para ir para a estação!
                     totalLixoColetado += quantidadeColetada;
+                    coletasRealizadas += 1;
 
-                    System.out.println("[COLETA DE LIXO] Caminhão " + caminhao.id_caminhao_pequeno +
-                            " coletou " + quantidadeColetada + " toneladas na zona " +
-                            caminhao.zona_atual.getNome());
-                    System.out.println("[LIXO COLETADO] Lixo restante na zona " + caminhao.zona_atual.getNome() +
-                            ": " + caminhao.zona_atual.lixo_atual + " toneladas");
-                    caminhao.esta_coletando = false; // ele ja coletou, entao deve ir pra estação
                 }
+                atual = atual.prox;
             }
-            atual = atual.prox;
         }
-    }
+    } // funciona
 
     public void caminhaoPequenoIrPraEstacao() {
+        if (teresina.caminhoes_pequenos != null) {
+
+            ListaEncadeada.No<CaminhaoPequeno> atual = teresina.caminhoes_pequenos.head;
+
+            while (atual != null) {
+                CaminhaoPequeno caminhao = atual.dado;
+                if (caminhao.coletou && caminhao.esta_indo_pra_estacao == false && caminhao.esta_na_estacao == false) { // se
+                                                                                                                        // o
+                                                                                                                        // caminhao
+                                                                                                                        // coletou
+                                                                                                                        // e
+                                                                                                                        // estiver
+                                                                                                                        // com
+                                                                                                                        // a
+                                                                                                                        // carga
+                                                                                                                        // positiva
+
+                    caminhao.estacao_a_ir = caminhao.zona_atual.estacao_descarga; // a estação q ele vai é a que a zona
+                                                                                  // descarga
+                    caminhao.esta_na_zona = false; // como ele ta indo pra zona, ele deixa de "estar nela"(mesmo q uma
+                                                   // estação seja dentro de uma zona, vcs entenderam)
+                    caminhao.esta_indo_pra_estacao = true; // ele começa a ir pra estação
+
+                    boolean horarioPico = teresina.estaEmHorarioPico(); // verificar se teresina ta em horario de pico,
+                                                                        // pq
+                                                                        // ai o tempo muda
+                    int tempo_viagem;
+                    if (horarioPico) {
+                        tempo_viagem = caminhao.zona_atual.tempo_viagem_estacao_pico;
+                    } else {
+                        tempo_viagem = caminhao.zona_atual.tempo_viagem_estacao_normal;
+                    }
+
+                    caminhao.tempo_viagem_ida = tempo_viagem;
+                    caminhao.tempo_restante_viagem = tempo_viagem;
+                    System.out.println("[IDA A ESTAÇÃO] Caminhão " + caminhao.id_caminhao_pequeno +
+                            " indo para estação " + caminhao.estacao_a_ir.getNome() +
+                            " | Tempo: " + tempo_viagem + " min");
+                    System.out.println(" ");
+
+                }
+                atual = atual.prox;
+            }
+        }
+    } // funciona
+
+    public void processarCaminhoesPequenos() {
+        if (teresina.caminhoes_pequenos != null) {
+
+            ListaEncadeada.No<CaminhaoPequeno> atual = teresina.caminhoes_pequenos.head;
+
+            while (atual != null) {
+                CaminhaoPequeno caminhaoPequeno = atual.dado;
+                            if (caminhaoPequeno.esta_na_estacao && !caminhaoPequeno.esta_indo_pra_estacao && 
+                caminhaoPequeno.estacao_atual != null &&
+                caminhaoPequeno.estacao_atual.fila_caminhao_pequeno.head != null &&
+                !caminhaoPequeno.estacao_atual.fila_caminhao_pequeno.estaVazia() &&
+                caminhaoPequeno == caminhaoPequeno.estacao_atual.fila_caminhao_pequeno.espiar()) {
+
+                if (caminhaoPequeno.estacao_atual.fila_caminhao_grande.estaVazia()) {
+                    if (caminhaoPequeno.tempo_inicio_espera == 0) {
+                        caminhaoPequeno.tempo_inicio_espera = minutosSimulados;
+                    }
+                    caminhaoPequeno.tempo_espera_acumulado = minutosSimulados - caminhaoPequeno.tempo_inicio_espera;
+                } else {
+                        somaTemposEsperaPequenos = somaTemposEsperaPequenos + caminhaoPequeno.tempo_espera_acumulado;
+                        caminhaoPequeno.tempo_espera_acumulado = 0; // Reset se há caminhão grande
+                        // aqui a coleta vai acontecer
+                        CaminhaoGrande caminhaoGrande = caminhaoPequeno.estacao_atual.fila_caminhao_grande.espiar();
+                        caminhaoGrande.tempo_espera_acumulado = 0;
+                        int quantidadeLiberada = Math.min(caminhaoPequeno.carga_atual, caminhaoGrande.espaco);
+                        totalLixoTransferido += quantidadeLiberada;
+                        caminhaoPequeno.liberarCarga(caminhaoGrande);
+                        System.out.printf("[TRANSFERÊNCIA] Caminhão P %s -> Caminhão G %s: %d toneladas\n",
+                                caminhaoPequeno.id_caminhao_pequeno,
+                                caminhaoGrande.id_caminhao_grande,
+                                quantidadeLiberada);
+                        System.out.println(" ");
+
+                        // Verifica se o caminhão pequeno esvaziou totalmente
+                        if (caminhaoPequeno.carga_atual == 0) {
+                            caminhaoPequeno.coletou = false; // Resetar flag
+                            caminhaoPequeno.vai_coletar = true;
+                            caminhaoPequeno.estacao_atual.fila_caminhao_pequeno.desenfileirar();
+                            System.out.println("[FINALIZADO] Caminhão P " + caminhaoPequeno.id_caminhao_pequeno
+                                    + " descarregou toda sua carga.");
+                            System.out.println(" ");
+
+                        }
+                    }
+                }
+                atual = atual.prox;
+            }
+        }
+    }
+
+    public void caminhaoPequenoVoltarColeta() {
+        if (teresina.caminhoes_pequenos != null) {
+
+            ListaEncadeada.No<CaminhaoPequeno> atual = teresina.caminhoes_pequenos.head;
+
+            while (atual != null) {
+                CaminhaoPequeno caminhaoPequeno = atual.dado;
+                if (caminhaoPequeno.coletou == false && caminhaoPequeno.vai_coletar
+                        && caminhaoPequeno.esta_na_zona == false && !caminhaoPequeno.esta_indo_pra_zona
+                        && caminhaoPequeno.zonas_de_atuacao.head != null) {
+                    if (caminhaoPequeno.zona_atual.lixo_atual != 0) {
+                        caminhaoPequeno.zona_a_ir = caminhaoPequeno.zona_atual;
+                        System.out.println(
+                                " [RETORNO A COLETA]  - Voltando para zona atual: "
+                                        + caminhaoPequeno.zona_atual.getNome() +
+                                        " (Lixo disponível: " + caminhaoPequeno.zona_atual.lixo_atual + " ton)");
+                        System.out.println(" ");
+                        if (teresina.estaEmHorarioPico()) {
+                            caminhaoPequeno.tempo_viagem_volta = caminhaoPequeno.zona_a_ir.tempo_viagem_estacao_pico;
+                            caminhaoPequeno.tempo_restante_viagem = caminhaoPequeno.zona_a_ir.tempo_viagem_estacao_pico;
+                        } else {
+                            caminhaoPequeno.tempo_viagem_volta = caminhaoPequeno.zona_a_ir.tempo_viagem_estacao_normal;
+                            caminhaoPequeno.tempo_restante_viagem = caminhaoPequeno.zona_a_ir.tempo_viagem_estacao_normal;
+                        }
+
+                        caminhaoPequeno.esta_indo_pra_zona = true;
+                        caminhaoPequeno.esta_na_estacao = false;
+                        totalViagensPequenos++;
+                        caminhaoPequeno.tempo_espera_acumulado = 0;
+                        caminhaoPequeno.tempo_inicio_espera = 0;
+                        
+
+                    } else {
+                        caminhaoPequeno.zonas_de_atuacao.desenfileirar();
+                        if (caminhaoPequeno.zonas_de_atuacao.head != null) {
+                            caminhaoPequeno.zona_a_ir = caminhaoPequeno.zonas_de_atuacao.head.dado;
+                            System.out.println(" [RETORNO A COLETA - NOVA ZONA] - Próxima zona na fila: "
+                                    + caminhaoPequeno.zona_a_ir.getNome() + " (Lixo: "
+                                    + caminhaoPequeno.zona_a_ir.lixo_atual
+                                    + " ton)");
+                            System.out.println(" ");
+                            if (teresina.estaEmHorarioPico()) {
+                                caminhaoPequeno.tempo_viagem_volta = caminhaoPequeno.zona_a_ir.tempo_viagem_estacao_pico;
+                                caminhaoPequeno.tempo_restante_viagem = caminhaoPequeno.zona_a_ir.tempo_viagem_estacao_pico;
+                            } else {
+                                caminhaoPequeno.tempo_viagem_volta = caminhaoPequeno.zona_a_ir.tempo_viagem_estacao_normal;
+                                caminhaoPequeno.tempo_restante_viagem = caminhaoPequeno.zona_a_ir.tempo_viagem_estacao_normal;
+                            }
+
+                            caminhaoPequeno.esta_indo_pra_zona = true;
+                            caminhaoPequeno.esta_na_estacao = false;
+                            totalViagensPequenos++;
+                            caminhaoPequeno.tempo_espera_acumulado = 0;
+                            caminhaoPequeno.tempo_inicio_espera = 0;
+                        }
+                    }
+                }
+
+                atual = atual.prox;
+            }
+        }
+    } // acredito q ok
+
+    public void processarCaminhoesGrandes() {
+        if (teresina.caminhoes_pequenos != null) {
+
+            ListaEncadeada.No<CaminhaoGrande> atual = teresina.caminhoes_grandes.head;
+            while (atual != null) {
+                CaminhaoGrande caminhao = atual.dado;
+                if (caminhao.esta_na_estacao && caminhao.estacao.fila_caminhao_grande.espiar() == caminhao) {
+
+                    if (caminhao.estacao.fila_caminhao_pequeno.estaVazia()) {
+
+                        caminhao.tempo_espera_acumulado = minutosSimulados - caminhao.tempo_inicio_espera;
+                    }
+
+                    if ((caminhao.tempo_espera_acumulado >= caminhao.tolerancia_minutos && caminhao.carga_atual > 0)
+                            || caminhao.carga_atual >= caminhao.capacidade_maxima) {
+                        caminhao.iniciarViagemAoAterro(teresina.estaEmHorarioPico());
+                        System.out.printf(
+                                "\n[ATERRO] Caminhão G %s partindo para aterro. (Carga: %d/%d ton | Espera: %d min)\n",
+                                caminhao.id_caminhao_grande, caminhao.carga_atual,
+                                caminhao.capacidade_maxima, caminhao.tempo_espera_acumulado);
+                        caminhao.estacao.fila_caminhao_grande.desenfileirar();
+                        System.out.println(" ");
+                        caminhao.esta_na_estacao = false;
+                        caminhao.em_viagem_ao_aterro = true;
+                        if (teresina.estaEmHorarioPico()) {
+                            caminhao.tempo_viagem_ida = caminhao.estacao.tempo_viagem_aterro_pico;
+                            caminhao.tempo_restante_viagem = caminhao.estacao.tempo_viagem_aterro_pico;
+
+                        } else {
+
+                            caminhao.tempo_viagem_ida = caminhao.estacao.tempo_viagem_aterro_normal;
+                            caminhao.tempo_restante_viagem = caminhao.estacao.tempo_viagem_aterro_normal;
+                        }
+
+                    }
+
+                }
+                atual = atual.prox;
+            }
+        }
+    } // acho q ok
+
+    public void adicionarCaminhaoGrande() {
         ListaEncadeada.No<CaminhaoPequeno> atual = teresina.caminhoes_pequenos.head;
 
         while (atual != null) {
-            CaminhaoPequeno caminhao = atual.dado;
+            CaminhaoPequeno caminhaoPequeno = atual.dado;
+            if (caminhaoPequeno.estacao_atual != null &&
+                    caminhaoPequeno.estacao_atual.fila_caminhao_pequeno != null &&
+                    !caminhaoPequeno.estacao_atual.fila_caminhao_pequeno.estaVazia()) {
 
-            // caminhão deve ir pr estação, ele nao pode ir vazio e nem pode estar coletando
-            // mais.
-            if (caminhao.carga_atual > 0 && !caminhao.esta_coletando && caminhao.estacao_a_ir == null && !caminhao.esta_na_estacao && caminhao.zona_a_ir == null) {
-                boolean horarioPico = teresina.estaEmHorarioPico();
-                int tempo_viagem;
-                if (horarioPico) {
-                    tempo_viagem = caminhao.zona_atual.tempo_viagem_estacao_pico;
-                } else {
-                    tempo_viagem = caminhao.zona_atual.tempo_viagem_estacao_normal;
-                }
+                if (caminhaoPequeno == caminhaoPequeno.estacao_atual.fila_caminhao_pequeno.espiar() &&
+                        caminhaoPequeno.tempo_espera_acumulado >= caminhaoPequeno.tempo_max_espera && caminhaoPequeno.estacao_atual.fila_caminhao_grande.estaVazia() ) {
 
-                caminhao.tempo_viagem_ida = tempo_viagem;
-                caminhao.tempo_restante_viagem = tempo_viagem;
-                caminhao.estacao_a_ir = caminhao.zona_atual.estacao_descarga; // Define estação como destino
-                caminhao.esta_coletando = false;
+                    somaTemposEsperaPequenos = somaTemposEsperaPequenos + caminhaoPequeno.tempo_espera_acumulado;
 
-                System.out.println("[IDA] Caminhão " + caminhao.id_caminhao_pequeno +
-                        " indo para estação " + caminhao.estacao_a_ir.getNome() +
-                        " | Tempo: " + tempo_viagem + " min");
-            }
+                    EstacaoTransferencia estacao = caminhaoPequeno.estacao_atual;
 
-            atual = atual.prox;
-        }
-    }
-
-   
-
-    // Esse método atualiza o deslocamento dos caminhões, minuto a minuto
-    // Se o caminhão estiver a caminho de algum lugar (zona ou estação), ele diminui
-    // o tempo restante de viagem
-    // Quando o tempo chega a 0, ele chega no destino
-    // Se chegou numa estação, ele entra na fila para transferir carga
-    // Se chegou na zona, volta a coletar
-    // Também atualizo o tempo total de viagem e o número de viagens feitas
-    // Se a zona estiver sem lixo, retiro ela da fila e passo para a próxima
-
-    public void atualizarMovimentoCaminhoes() {
-    ListaEncadeada.No<CaminhaoPequeno> atual = teresina.caminhoes_pequenos.head;
-    while (atual != null) {
-        CaminhaoPequeno caminhao = atual.dado;
-
-        if ((caminhao.estacao_a_ir != null || caminhao.zona_a_ir != null) && !caminhao.esta_coletando && caminhao.tempo_espera_acumulado == 0) {
-            if (caminhao.tempo_restante_viagem > 0) {
-                caminhao.tempo_restante_viagem -= 1;
-                System.out.println("Caminhão " + caminhao.id_caminhao_pequeno +
-                        " a caminho: " + caminhao.tempo_restante_viagem +
-                        " minutos restantes");
-            }
-
-            if (caminhao.tempo_restante_viagem <= 0) {
-                if (caminhao.estacao_a_ir != null) {
-                    // Chegou na estação 
-                    somaTemposViagemPequenos += caminhao.tempo_viagem_ida;
-                    caminhao.estacao_atual = caminhao.estacao_a_ir;
-                    caminhao.esta_na_estacao = true;
-                    caminhao.estacao_a_ir = null;
-                    System.out.println("[CHEGOU-ESTAÇÃO] Caminhão " + caminhao.id_caminhao_pequeno +
-                            " completou viagem de ida em " + caminhao.tempo_viagem_ida + " minutos");
-
-                    if (caminhao.estacao_atual instanceof EstacaoTransferencia) {
-                        caminhao.estacao_atual.fila_caminhao_pequeno.enfileirar(caminhao);
-                    }
-                } else if (caminhao.zona_a_ir != null) {
-                    // Chegou na zona
-                    caminhao.zona_atual = caminhao.zona_a_ir;
-                    caminhao.zona_a_ir = null;
-                    caminhao.esta_coletando = true;
-                    System.out.println("[CHEGOU-ZONA] Caminhão " + caminhao.id_caminhao_pequeno +
-                            " chegou na zona " + caminhao.zona_atual.getNome());
-                }
-                totalViagensPequenos++;
-            }
-        }
-        atual = atual.prox;
-    }
-}
-    
-
-    public void processarCaminhoesPequenos() {
-        ListaEncadeada.No<EstacaoTransferencia> estacaoAtual = teresina.estacoes_transferencia.head;
-
-        while (estacaoAtual != null) {
-            EstacaoTransferencia estacao = estacaoAtual.dado;
-
-            if (!estacao.fila_caminhao_pequeno.estaVazia()) {
-                CaminhaoPequeno caminhaoPequeno = estacao.fila_caminhao_pequeno.espiar();
-
-                if (caminhaoPequeno.tempo_inicio_espera == 0) {
-                    caminhaoPequeno.tempo_inicio_espera = minutosSimulados;
-                }
-                caminhaoPequeno.tempo_espera_acumulado = minutosSimulados - caminhaoPequeno.tempo_inicio_espera;
-
-                boolean podeAtender = false;
-                if (!estacao.fila_caminhao_grande.estaVazia()) {
-                    CaminhaoGrande caminhaoGrande = estacao.fila_caminhao_grande.espiar();
-                    podeAtender = (!caminhaoGrande.coletando && !caminhaoGrande.em_viagem_ao_aterro);
-                }
-
-                if (podeAtender) {
-                    CaminhaoGrande caminhaoGrande = estacao.fila_caminhao_grande.espiar();
-                    int quantidade = Math.min(caminhaoPequeno.carga_atual, caminhaoGrande.espaco);
-                    caminhaoPequeno.liberarCarga(caminhaoGrande);
-                    totalLixoTransferido += quantidade;
-
-                    caminhaoGrande.coletando = true;
-                    caminhaoPequeno.tempo_inicio_espera = 0;
-                    caminhaoPequeno.tempo_espera_acumulado = 0;
-                    caminhaoPequeno.ultimaEstacaoVisitada = estacao;
-
-                    if (caminhaoPequeno.carga_atual == 0) {
-                        // Remove da fila da estação
-                        estacao.fila_caminhao_pequeno.desenfileirar();
-                        caminhaoPequeno.tempo_espera_acumulado = 0;
-                        
-                        
-
-
-                       
-                            }
-                        } else {
-                    // Atualiza estatísticas de espera
-                    if (caminhaoPequeno.tempo_espera_acumulado > maxTempoEsperaPequenos) {
-                        maxTempoEsperaPequenos = caminhaoPequeno.tempo_espera_acumulado;
-                    }
-                    somaTemposEsperaPequenos += caminhaoPequeno.tempo_espera_acumulado;
-                    totalAtendimentosEstacoes++;
-
-                    if (caminhaoPequeno.tempo_espera_acumulado >= 20) {
-                        System.out.println("[ALERTA] Tempo de espera excedido para " +
-                                caminhaoPequeno.id_caminhao_pequeno);
-                    }
-                }
-            }
-            estacaoAtual = estacaoAtual.prox;
-        }
-    }
-
-     public void caminhaoPequenoVoltarColeta() {
-    ListaEncadeada.No<CaminhaoPequeno> atual = teresina.caminhoes_pequenos.head;
-
-    while (atual != null) {
-        CaminhaoPequeno caminhaoPequeno = atual.dado;
-        
-        // Caminhão está em estação, sem carga e não está coletando
-        if (caminhaoPequeno.estacao_atual != null && caminhaoPequeno.carga_atual == 0 && !caminhaoPequeno.esta_coletando) {
-            // Verifica se a zona atual ainda tem lixo
-            if (caminhaoPequeno.zona_atual != null && caminhaoPequeno.zona_atual.lixo_atual > 0) {
-                // Volta para a mesma zona
-                boolean horarioPico = teresina.estaEmHorarioPico();
-                caminhaoPequeno.tempo_viagem_volta = horarioPico ? 
-                    caminhaoPequeno.zona_atual.tempo_viagem_estacao_pico : 
-                    caminhaoPequeno.zona_atual.tempo_viagem_estacao_normal;
-                
-                caminhaoPequeno.tempo_restante_viagem = caminhaoPequeno.tempo_viagem_volta;
-                caminhaoPequeno.zona_a_ir = caminhaoPequeno.zona_atual;
-                caminhaoPequeno.estacao_atual = null;
-                
-                System.out.println("Caminhão " + caminhaoPequeno.id_caminhao_pequeno +
-                        " retornando para " + caminhaoPequeno.zona_atual.getNome());
-                caminhaoPequeno.esta_na_estacao = false;
-            } else {
-                // Zona está vazia, vai para próxima zona ou encerra
-                if (caminhaoPequeno.zonas_de_atuacao != null && !caminhaoPequeno.zonas_de_atuacao.estaVazia()) {
-                    caminhaoPequeno.zonas_de_atuacao.desenfileirar();
-                    
-                    if (!caminhaoPequeno.zonas_de_atuacao.estaVazia()) {
-                        caminhaoPequeno.zona_atual = caminhaoPequeno.zonas_de_atuacao.espiar();
-                        boolean horarioPico = teresina.estaEmHorarioPico();
-                        caminhaoPequeno.tempo_viagem_volta = horarioPico ? 
-                            caminhaoPequeno.zona_atual.tempo_viagem_estacao_pico : 
-                            caminhaoPequeno.zona_atual.tempo_viagem_estacao_normal;
-                        
-                        caminhaoPequeno.tempo_restante_viagem = caminhaoPequeno.tempo_viagem_volta;
-                        caminhaoPequeno.zona_a_ir = caminhaoPequeno.zona_atual;
-                        caminhaoPequeno.estacao_atual = null;
-                        
-                        System.out.println("Caminhão " + caminhaoPequeno.id_caminhao_pequeno +
-                                " indo para nova zona " + caminhaoPequeno.zona_atual.getNome());
-                        caminhaoPequeno.esta_na_estacao = false;
-                    }
-                }
-            }
-        }
-        atual = atual.prox;
-    }
-}
-
-    public void processarCaminhoesGrandes() {
-        // Percorre todas as estações de transferência
-        ListaEncadeada.No<EstacaoTransferencia> estacaoAtual = teresina.estacoes_transferencia.head;
-        boolean horarioPico = teresina.estaEmHorarioPico();
-
-        while (estacaoAtual != null) {
-            EstacaoTransferencia estacao = estacaoAtual.dado;
-
-            // Verifica se há caminhões grandes esperando na estação
-            if (!estacao.fila_caminhao_grande.estaVazia()) {
-                CaminhaoGrande caminhaoGrande = estacao.fila_caminhao_grande.espiar();
-
-                // Registra o início da espera se ainda não foi feito
-                if (caminhaoGrande.tempo_inicio_espera == 0) {
-                    caminhaoGrande.tempo_inicio_espera = minutosSimulados;
-                }
-
-                // Atualiza o tempo de espera acumulado
-                caminhaoGrande.tempo_espera_acumulado = minutosSimulados - caminhaoGrande.tempo_inicio_espera;
-
-                // Verifica condições para o caminhão grande ser enviado ao aterro
-                int cargaAtual = caminhaoGrande.capacidade_maxima - caminhaoGrande.espaco;
-                boolean deveIrParaAterro = false;
-
-                // Vai ao aterro se estiver cheio ou se a espera exceder o tempo máximo
-                if (caminhaoGrande.coletando) {
-                    deveIrParaAterro = (cargaAtual == caminhaoGrande.capacidade_maxima) ||
-                            (caminhaoGrande.tempo_espera_acumulado >= caminhaoGrande.tolerancia_minutos
-                                    && cargaAtual > 0);
-                }
-
-                if (deveIrParaAterro && cargaAtual > 0) {
-                    // Remove da fila, inicia a viagem ao aterro e atualiza estatísticas
-                    estacao.fila_caminhao_grande.desenfileirar();
-                    caminhaoGrande.iniciarViagemAoAterro(estacao, horarioPico);
-                    totalViagensGrandes++;
-                    somaTemposViagemGrandes += (horarioPico ? caminhaoGrande.estacaoOrigem.tempo_viagem_aterro_pico
-                            : caminhaoGrande.estacaoOrigem.tempo_viagem_aterro_normal);
-
-                    caminhaoGrande.coletando = false;
-                    caminhaoGrande.tempo_inicio_espera = 0;
-                    caminhaoGrande.tempo_espera_acumulado = 0;
-
-                    System.out.println("Caminhão " + caminhaoGrande.id_caminhao_grande +
-                            " indo para o aterro com " + cargaAtual + " toneladas" +
-                            (caminhaoGrande.tempo_espera_acumulado >= caminhaoGrande.tolerancia_minutos
-                                    ? " [TEMPO DE ESPERA EXCEDIDO]"
-                                    : ""));
-                }
-            }
-            estacaoAtual = estacaoAtual.prox;
-        }
-    }
-
-    public void atualizarViagensAoAterro() {
-    // Atualiza os caminhões que estão em viagem ao aterro
-    ListaEncadeada.No<CaminhaoGrande> atual = teresina.caminhoes_grandes.head;
-
-    while (atual != null) {
-        CaminhaoGrande caminhao = atual.dado;
-
-        if (caminhao.em_viagem_ao_aterro) {
-            caminhao.tempo_restante_viagem -= 1; // Avança o tempo da viagem
-
-            // Se chegou ao aterro e ainda não descarregou
-            if (caminhao.tempo_restante_viagem <= 0 && !caminhao.esta_no_aterro) {
-                // Descarrega no aterro
-                int cargaDescarregada = caminhao.capacidade_maxima - caminhao.espaco;
-                if (cargaDescarregada > 0) {
-                    caminhao.descargaNoAterro();
-                    totalLixoDescarregado += cargaDescarregada;
-                    System.out.println("Caminhão " + caminhao.id_caminhao_grande +
-                            " descarregou " + cargaDescarregada + " toneladas no aterro");
-                }
-                
-                // Configura a viagem de volta
-                boolean horarioPico = teresina.estaEmHorarioPico();
-                caminhao.tempo_restante_viagem = horarioPico ? 
-                    caminhao.estacaoOrigem.tempo_viagem_aterro_pico : 
-                    caminhao.estacaoOrigem.tempo_viagem_aterro_normal;
-                caminhao.esta_no_aterro = true;
-                
-                System.out.println("Caminhão " + caminhao.id_caminhao_grande +
-                        " iniciando viagem de volta para " + caminhao.estacaoOrigem.getNome() +
-                        " | Tempo: " + caminhao.tempo_restante_viagem + " min");
-            } 
-            // Se está voltando para a estação e chegou
-            else if (caminhao.tempo_restante_viagem <= 0 && caminhao.esta_no_aterro) {
-                caminhao.em_viagem_ao_aterro = false;
-                caminhao.esta_no_aterro = false;
-                caminhao.estacaoOrigem.fila_caminhao_grande.enfileirar(caminhao);
-                
-                System.out.println("Caminhão " + caminhao.id_caminhao_grande +
-                        " retornou à estação " + caminhao.estacaoOrigem.getNome());
-            }
-            // Se ainda está viajando
-            else if (caminhao.tempo_restante_viagem > 0) {
-                System.out.println("Caminhão " + caminhao.id_caminhao_grande +
-                        " em viagem: " + caminhao.tempo_restante_viagem +
-                        " minutos restantes");
-            }
-        }
-        atual = atual.prox;
-    }
-}
-    public void adicionarCaminhaoGrande() {
-        // Adiciona caminhão grande extra se houver caminhão pequeno esperando demais
-        ListaEncadeada.No<EstacaoTransferencia> estacaoAtual = teresina.estacoes_transferencia.head;
-        while (estacaoAtual != null) {
-            EstacaoTransferencia estacao = estacaoAtual.dado;
-
-            if (!estacao.fila_caminhao_pequeno.estaVazia()) {
-                CaminhaoPequeno caminhaoPequeno = estacao.fila_caminhao_pequeno.espiar();
-
-                // Se o tempo de espera do pequeno for muito alto, cria caminhão grande extra
-                if (caminhaoPequeno.tempo_espera_acumulado >= caminhaoPequeno.tempo_max_espera) {
                     String novoId = "CG-Extra-" + System.currentTimeMillis() % 10000;
                     CaminhaoGrande novoCaminhao = new CaminhaoGrande(novoId, estacao);
-
                     estacao.fila_caminhao_grande.enfileirar(novoCaminhao);
                     teresina.caminhoes_grandes.adicionar(novoCaminhao);
                     totalCaminhoesGrandesAdicionados++;
 
-                    System.out.println("ALERTA: Adicionado caminhão grande extra " + novoId +
-                            " na " + estacao.getNome());
+                    System.out.println("[ALERTA] Adicionado caminhão grande extra " + novoId +
+                            " na " + estacao.getNome() +
+                            " após " + caminhaoPequeno.tempo_espera_acumulado + " min de espera");
+                    System.out.println(" ");
 
-                    // Reinicia o tempo de espera do pequeno
                     caminhaoPequeno.tempo_inicio_espera = 0;
                     caminhaoPequeno.tempo_espera_acumulado = 0;
-                }
-            }
-            estacaoAtual = estacaoAtual.prox;
-        }
-    }
 
-    public void CaminhoesChegamAoAterro() {
-        // Verifica se caminhões chegaram ao aterro e descarrega
-        ListaEncadeada.No<CaminhaoGrande> atual = teresina.caminhoes_grandes.head;
-
-        while (atual != null) {
-            CaminhaoGrande caminhao = atual.dado;
-
-            if (caminhao.em_viagem_ao_aterro && caminhao.tempo_restante_viagem <= 0 && !caminhao.esta_no_aterro) {
-                int cargaDescarregada = caminhao.capacidade_maxima - caminhao.espaco;
-
-                // Se houver carga a ser descarregada, realiza a descarga
-                if (cargaDescarregada > 0) {
-                    caminhao.descargaNoAterro();
-                    totalLixoDescarregado += cargaDescarregada;
-                    System.out.println("Caminhão " + caminhao.id_caminhao_grande +
-                            " descarregou " + cargaDescarregada + " toneladas no aterro");
                 }
 
-                // Prepara retorno da viagem
-                boolean horarioPico = teresina.estaEmHorarioPico();
-                caminhao.tempo_restante_viagem = horarioPico ? caminhao.estacaoOrigem.tempo_viagem_aterro_pico
-                        : caminhao.estacaoOrigem.tempo_viagem_aterro_normal;
-                caminhao.esta_no_aterro = true;
-                caminhao.em_viagem_ao_aterro = false;
             }
+
             atual = atual.prox;
         }
     }
 
+    public void atualizarMovimentoCaminhoesPequenos() {
+        if (teresina.caminhoes_pequenos != null) {
+
+            ListaEncadeada.No<CaminhaoPequeno> atual = teresina.caminhoes_pequenos.head;
+            while (atual != null) {
+                CaminhaoPequeno caminhao = atual.dado;
+                if (caminhao.esta_na_estacao == false && caminhao.esta_na_zona == false) {
+
+                    if (caminhao.esta_indo_pra_estacao) {
+                        if (caminhao.tempo_restante_viagem > 0) {
+                            caminhao.tempo_restante_viagem -= 1;
+                            System.out.println("[VIAGEM PRA ESTAÇÃO] Caminhão " + caminhao.id_caminhao_pequeno +
+                                    " a caminho: " + caminhao.tempo_restante_viagem +
+                                    " minutos restantes");
+                                    caminhao.tempo_espera_acumulado = 0;
+                                    caminhao.tempo_inicio_espera = 0;
+
+                        } else if (caminhao.tempo_restante_viagem <= 0) {
+                            caminhao.estacao_atual = caminhao.estacao_a_ir;
+                            caminhao.esta_na_estacao = true;
+                            caminhao.estacao_a_ir = null;
+                            caminhao.esta_indo_pra_estacao = false;
+                            System.out.println("[CHEGOU-ESTAÇÃO] Caminhão " + caminhao.id_caminhao_pequeno +
+                                    " completou viagem de ida em " + caminhao.tempo_viagem_ida + " minutos");
+                            caminhao.estacao_atual.fila_caminhao_pequeno.enfileirar(caminhao);
+                            totalViagensPequenos++;
+                            caminhao.tempo_inicio_espera = minutosSimulados;
+                        }
+
+                    } else if (caminhao.esta_indo_pra_zona) {
+                        if (caminhao.tempo_restante_viagem > 0) {
+                            caminhao.tempo_restante_viagem -= 1;
+                            System.out.println("[VIAGEM PRA ZONA] Caminhão " + caminhao.id_caminhao_pequeno +
+                                    " a caminho: " + caminhao.tempo_restante_viagem +
+                                    " minutos restantes");
+                                    caminhao.tempo_espera_acumulado = 0;
+                                    caminhao.tempo_inicio_espera = 0;
+
+                        } else if (caminhao.tempo_restante_viagem <= 0) {
+                            caminhao.esta_na_zona = true;
+                            caminhao.esta_indo_pra_zona = false;
+                            caminhao.zona_a_ir = null;
+                            caminhao.esta_coletando = true;
+                            System.out.println("[CHEGOU-ZONA] Caminhão " + caminhao.id_caminhao_pequeno +
+                                    " chegou na zona " + caminhao.zona_atual.getNome());
+                            totalViagensPequenos++;
+                            caminhao.tempo_espera_acumulado = 0;
+                                    caminhao.tempo_inicio_espera = 0;
+
+                        }
+
+                    }
+
+                }
+
+                atual = atual.prox;
+            }
+        }
+    }
+
+    public void CaminhoesChegamAoAterro() {
+    ListaEncadeada.No<CaminhaoGrande> atual = teresina.caminhoes_grandes.head;
+
+    while (atual != null) {
+        CaminhaoGrande caminhao = atual.dado;
+        if (caminhao.esta_no_aterro && !caminhao.em_viagem_ao_aterro) {  
+            System.out.println("\n[ATERRO] Caminhão G " + caminhao.id_caminhao_grande +
+                    " descarregou " + caminhao.carga_atual + " toneladas");
+            totalLixoDescarregado += caminhao.carga_atual;
+            caminhao.descargaNoAterro();
+
+            caminhao.esta_no_aterro = false;
+            caminhao.em_retorno_do_aterro = true;
+            
+            System.out.println("[VOLTA PRA ESTACAO] Caminhão G " + caminhao.id_caminhao_grande
+                    + " esta voltando para sua estação de transferencia após descarga no aterro");
+            
+            if (teresina.estaEmHorarioPico()) {
+                caminhao.tempo_viagem_retorno = caminhao.estacao.tempo_viagem_aterro_pico;
+                caminhao.tempo_restante_viagem = caminhao.estacao.tempo_viagem_aterro_pico;
+            } else {
+                caminhao.tempo_viagem_retorno = caminhao.estacao.tempo_viagem_aterro_normal;
+                caminhao.tempo_restante_viagem = caminhao.estacao.tempo_viagem_aterro_normal;
+            }
+        }
+        atual = atual.prox;
+    }
+}
+
+    public void atualizarViagensAoAterro() {
+    ListaEncadeada.No<CaminhaoGrande> atual = teresina.caminhoes_grandes.head;
+
+    while (atual != null) {
+        CaminhaoGrande caminhao = atual.dado;
+        
+        // Viagem de ida ao aterro
+        if (caminhao.em_viagem_ao_aterro && !caminhao.em_retorno_do_aterro) {
+            if (caminhao.tempo_restante_viagem > 0) {
+                caminhao.tempo_restante_viagem -= 1;
+                System.out.println("[VIAGEM PRO ATERRO] Caminhão " + caminhao.id_caminhao_grande +
+                        " a caminho: " + caminhao.tempo_restante_viagem +
+                        " minutos restantes");
+            } else {
+                // Quando chega no aterro
+                caminhao.esta_no_aterro = true;
+                caminhao.em_viagem_ao_aterro = false;  // Importante: desativa a viagem de ida
+                System.out.println("[CHEGOU-ATERRO] Caminhão " + caminhao.id_caminhao_grande +
+                        " completou viagem de ida em " + caminhao.tempo_viagem_ida + " minutos");
+                caminhao.tempo_viagem_ida = 0;
+                totalViagensGrandes++;
+            }
+        }
+        
+        // Viagem de volta do aterro
+        else if (caminhao.em_retorno_do_aterro && !caminhao.em_viagem_ao_aterro) {
+            if (caminhao.tempo_restante_viagem > 0) {
+                caminhao.tempo_restante_viagem -= 1;
+                System.out.println("[VIAGEM DE VOLTA PRA ESTAÇÃO] Caminhão " + caminhao.id_caminhao_grande +
+                        " a caminho: " + caminhao.tempo_restante_viagem +
+                        " minutos restantes");
+            } else {
+                // Quando chega na estação
+                caminhao.esta_na_estacao = true;
+                caminhao.em_retorno_do_aterro = false;
+                System.out.println("[CHEGOU-ESTAÇÃO] Caminhão " + caminhao.id_caminhao_grande +
+                        " completou viagem de volta em " + caminhao.tempo_viagem_retorno + " minutos");
+                caminhao.tempo_viagem_retorno = 0;
+                caminhao.estacao.fila_caminhao_grande.enfileirar(caminhao);
+
+            }
+        }
+
+        atual = atual.prox;
+    }
+}
     public void exibirEstatisticas() {
         // Exibe resumo da simulação
         System.out.println("\n======== ESTATÍSTICAS DA SIMULAÇÃO ========");
 
-        double mediaViagemPequenos = totalViagensPequenos > 0 ? (double) somaTemposViagemPequenos / totalViagensPequenos
-                : 0;
-
-        double mediaViagemGrandes = totalViagensGrandes > 0 ? (double) somaTemposViagemGrandes / totalViagensGrandes
-                : 0;
-
-        double mediaEsperaPequenos = totalAtendimentosEstacoes > 0
-                ? (double) somaTemposEsperaPequenos / totalAtendimentosEstacoes
+        double mediaEsperaPequenos = this.teresina.caminhoes_pequenos.tamanho > 0
+                ? (double) somaTemposEsperaPequenos / this.teresina.caminhoes_pequenos.tamanho
                 : 0;
 
         System.out.println("ESTATÍSTICAS GERAIS:");
-        System.out
-                .println("- Tempo médio de viagem (pequenos): " + String.format("%.1f", mediaViagemPequenos) + " min");
-        System.out.println("- Tempo médio ao aterro (grandes): " + String.format("%.1f", mediaViagemGrandes) + " min");
+
         System.out
                 .println("- Tempo médio de espera (pequenos): " + String.format("%.1f", mediaEsperaPequenos) + " min");
-        System.out.println("- Máximo tempo de espera: " + maxTempoEsperaPequenos + " min");
         System.out.println("- Caminhões grandes adicionados: " + totalCaminhoesGrandesAdicionados);
         System.out.println("- Lixo coletado total: " + totalLixoColetado + " ton");
         System.out.println("- Lixo transferido entre caminhões: " + totalLixoTransferido + " ton");
         System.out.println("- Lixo efetivamente descarregado: " + totalLixoDescarregado + " ton");
-        System.out.println("- Total viagens pequenos: " + totalViagensPequenos);
+        System.out.println("- Total viagens pequenos (ida e volta): " + totalViagensPequenos);
         System.out.println("- Total viagens aterro: " + totalViagensGrandes);
     }
 

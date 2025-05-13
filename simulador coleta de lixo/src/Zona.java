@@ -68,9 +68,7 @@ public class Zona {
 
     public int LixoColetado(int quantidadeSolicitada) {
         int coletado =  Math.min(quantidadeSolicitada, lixo_atual);
-        this.lixo_atual = lixo_atual - quantidadeSolicitada;
-        System.out.println(
-                "Zona " + nome + ": " + coletado + " toneladas coletadas. Lixo restante: " + lixo_atual + " toneladas.");
+        this.lixo_atual = Math.max(0, lixo_atual - coletado);
         return coletado ;
     }
 
