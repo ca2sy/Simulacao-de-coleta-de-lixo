@@ -21,6 +21,9 @@ public class CaminhaoPequeno {
     public Zona zona_a_ir;
     
 
+    //horario começar
+    public int horario_inicio;
+
     // Atributos de estação
     public EstacaoTransferencia estacao_a_ir; //estação q ta indo
     public EstacaoTransferencia estacao_atual;
@@ -34,6 +37,7 @@ public class CaminhaoPequeno {
     public boolean vai_coletar = true;
     public boolean esta_indo_pra_estacao = false;
     public boolean esta_indo_pra_zona;
+    public boolean esta_trabalhando = false;
     
 
     public boolean esta_coletando;
@@ -47,13 +51,14 @@ public class CaminhaoPequeno {
     public int tempo_viagem_volta;
 
     public CaminhaoPequeno(int capacidade, Fila<Zona> zonas_de_atuacao, String id_caminhao_pequeno,
-            int numeros_viagem_a_realizar) {
+            int numeros_viagem_a_realizar, int horario) {
         this.capacidade = capacidade;
         this.zonas_de_atuacao = zonas_de_atuacao;
         this.carga_atual = 0;
         this.id_caminhao_pequeno = id_caminhao_pequeno;
         this.num_viagens_realizadas = 0;
         this.num_viagens_a_realizar = numeros_viagem_a_realizar;
+        this.horario_inicio = horario;
     }
 
     public int getCapacidade() {

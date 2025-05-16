@@ -60,6 +60,7 @@ public class Cidade {
             System.out.println(atual.dado.getIdCaminhaoPequeno());
             System.out.println("Capacidade " + atual.dado.getCapacidade());
             System.out.println("Zonas " + atual.dado.zonas_de_atuacao.listaString());
+            System.out.println("Hora que começa: " + atual.dado.horario_inicio/60 + "horas.");
             System.out.println("");
             atual = atual.prox;
         }

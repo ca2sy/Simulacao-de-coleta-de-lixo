@@ -1,7 +1,3 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
-
 public class Fila<T> {
     public static class No<T> {
         T dado;
@@ -13,7 +9,7 @@ public class Fila<T> {
         }
     }
 
-    private List<T> listaInterna = new ArrayList<>();
+   
     public No<T> head;
     public No<T> tail;
     public int tamanho;

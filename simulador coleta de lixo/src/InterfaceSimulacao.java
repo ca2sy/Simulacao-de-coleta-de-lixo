@@ -1,11 +1,10 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class InterfaceSimulacao extends JFrame {
     private Simulacao simulacao;
     private JTextArea logArea;
+    private JSlider velocidade;
     private JButton iniciarButton;
     private JButton pararButton;
     private JButton estatisticasButton;
@@ -13,6 +12,7 @@ public class InterfaceSimulacao extends JFrame {
     private JPanel statsPanel;
     private JLabel horaLabel;
     private Timer timerUI;
+    private int vel;
 
     public InterfaceSimulacao(Simulacao simulacao) {
         this.simulacao = simulacao;
@@ -33,6 +33,9 @@ public class InterfaceSimulacao extends JFrame {
         JScrollPane scrollPane = new JScrollPane(logArea);
 
         // Botões de controle
+        velocidade = new JSlider();
+        velocidade.setMaximum(900);
+        velocidade.setMinimum(0);
         iniciarButton = new JButton("Iniciar Simulação");
         pararButton = new JButton("Parar Simulação");
         pararButton.setEnabled(false);
@@ -40,6 +43,7 @@ public class InterfaceSimulacao extends JFrame {
 
         // Painel de controle
         controlPanel = new JPanel();
+        controlPanel.add(velocidade);
         controlPanel.add(iniciarButton);
         controlPanel.add(pararButton);
         controlPanel.add(estatisticasButton);
@@ -69,7 +73,14 @@ public class InterfaceSimulacao extends JFrame {
     private void setupListeners() {
         iniciarButton.addActionListener(e -> iniciarSimulacao());
         pararButton.addActionListener(e -> pararSimulacao());
+        velocidade.addChangeListener(e -> mudarVelocidade());
         estatisticasButton.addActionListener(e -> mostrarEstatisticasCompletas());
+    }
+
+    private void mudarVelocidade(){
+        this.vel = 1000 - this.velocidade.getValue();
+        this.simulacao.VELOCIDADE = this.vel;
+        this.simulacao.INTERVALO_REAL_MS = this.vel;
     }
 
     private void iniciarSimulacao() {

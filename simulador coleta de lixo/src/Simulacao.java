@@ -15,7 +15,7 @@ public class Simulacao {
     public int hora_atual;
     private Timer timer;
     public int minutosSimulados;
-    final long INTERVALO_REAL_MS = 1000; // 1 segundo = 1000ms
+    public int INTERVALO_REAL_MS = 1000; // 1 segundo = 1000ms
     final long MINUTOS_POR_DIA = 24 * 60;
 
     // variaveis pra guardar estatisticas
@@ -27,6 +27,7 @@ public class Simulacao {
     public int somaTemposEsperaPequenos = 0;
     public int totalLixoTransferido = 0;
     public int totalLixoDescarregado = 0;
+    public int VELOCIDADE = 1000;
 
     // Construtor: define quantidade de cada tipo de caminhão, cria as estações, as
     // zonas, inicializa a cidade e os caminhões
@@ -47,7 +48,7 @@ public class Simulacao {
     private void iniciarSimulacao() {
         timer = new Timer();
 
-        final long INTERVALO_MINUTO_SIMULADO = 1000; // 1 segundo real = 1 minuto simulado (isso demora muito, qual
+        final long INTERVALO_MINUTO_SIMULADO = VELOCIDADE; // 1 segundo real = 1 minuto simulado (isso demora muito, qual
                                                      // seria o tempo ideal?)
 
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -212,9 +213,10 @@ public class Simulacao {
                 int indiceAleatorio = random.nextInt(total_zonas);
                 fila_zonas_caminhao_pequeno.enfileirar(arrayZonas[indiceAleatorio]);
             }
+            int horario_inicio = (random.nextInt(12) + 1) * 60;
 
             CaminhaoPequeno cp = new CaminhaoPequeno(2, fila_zonas_caminhao_pequeno, "CaminhaoP2_" + i,
-                    qtd_viagens_sorteada);
+                    qtd_viagens_sorteada, horario_inicio);
             teresina.caminhoes_pequenos.adicionar(cp);
         }
 
@@ -226,8 +228,10 @@ public class Simulacao {
                 int indiceAleatorio = random.nextInt(total_zonas);
                 fila_zonas_caminhao_pequeno.enfileirar(arrayZonas[indiceAleatorio]);
             }
+            int horario_inicio = (random.nextInt(12) + 1) * 60;
+
             CaminhaoPequeno cp = new CaminhaoPequeno(4, fila_zonas_caminhao_pequeno, "CaminhaoP4_" + i,
-                    qtd_viagens_sorteada);
+                    qtd_viagens_sorteada, horario_inicio);
             teresina.caminhoes_pequenos.adicionar(cp);
 
         }
@@ -240,8 +244,9 @@ public class Simulacao {
                 int indiceAleatorio = random.nextInt(total_zonas);
                 fila_zonas_caminhao_pequeno.enfileirar(arrayZonas[indiceAleatorio]);
             }
+            int horario_inicio = (random.nextInt(12) + 1) * 60;
             CaminhaoPequeno cp = new CaminhaoPequeno(8, fila_zonas_caminhao_pequeno, "CaminhaoP8_" + i,
-                    qtd_viagens_sorteada);
+                    qtd_viagens_sorteada,horario_inicio);
             teresina.caminhoes_pequenos.adicionar(cp);
         }
 
@@ -253,8 +258,9 @@ public class Simulacao {
                 int indiceAleatorio = random.nextInt(total_zonas);
                 fila_zonas_caminhao_pequeno.enfileirar(arrayZonas[indiceAleatorio]);
             }
+            int horario_inicio = (random.nextInt(12) + 1) * 60;
             CaminhaoPequeno cp = new CaminhaoPequeno(10, fila_zonas_caminhao_pequeno, "CaminhaoP10_" + i,
-                    qtd_viagens_sorteada);
+                    qtd_viagens_sorteada, horario_inicio);
             teresina.caminhoes_pequenos.adicionar(cp);
         }
 
@@ -302,13 +308,13 @@ public class Simulacao {
         if (teresina.caminhoes_pequenos != null) {
 
             ListaEncadeada.No<CaminhaoPequeno> atual = teresina.caminhoes_pequenos.head;
-            while (atual != null) {
+            while (atual != null ) {
 
                 // caso o numero de viagens realizadas for 0, ele começa em uma zona. como
                 // teoricamente ele foi pra aquela zona de algum lugar, eu ja aumento aqui o
                 // numero de viagens.
                 CaminhaoPequeno caminhao = atual.dado;
-                if (caminhao.num_viagens_realizadas == 0) {
+                if (caminhao.num_viagens_realizadas == 0  && this.minutosSimulados  == caminhao.horario_inicio) {
                     System.out.println("[CAMINHÃO PEQUENO COMEÇANDO] Caminhão " + atual.dado.id_caminhao_pequeno
                             + "Está começando agora na zona " + atual.dado.zonas_de_atuacao.head.dado.getNome() + ".");
                     System.out.println(" ");
@@ -320,6 +326,7 @@ public class Simulacao {
                     caminhao.esta_na_zona = true; // como ele começou agora, ele esta na zona agora. é como se ele
                                                   // tivesse
                                                   // acabado de chegar
+                    caminhao.esta_trabalhando = true;
                 }
                 atual = atual.prox;
             }
@@ -342,7 +349,7 @@ public class Simulacao {
                 CaminhaoPequeno caminhao = atual.dado;
 
                 // se o caminhao estiver em uma zona, ele pode coletar.
-                if (caminhao.esta_na_zona && caminhao.zona_atual != null && caminhao.coletou == false) {
+                if (caminhao.esta_na_zona && caminhao.zona_atual != null && caminhao.coletou == false && caminhao.esta_trabalhando == true) {
 
                     caminhao.esta_coletando = true;
                     int espaco_disponivel = caminhao.capacidade - caminhao.carga_atual;
@@ -372,7 +379,7 @@ public class Simulacao {
 
             while (atual != null) {
                 CaminhaoPequeno caminhao = atual.dado;
-                if (caminhao.coletou && caminhao.esta_indo_pra_estacao == false && caminhao.esta_na_estacao == false) { // se
+                if (caminhao.coletou && caminhao.esta_indo_pra_estacao == false && caminhao.esta_na_estacao == false && caminhao.esta_trabalhando == true) { // se
                                                                                                                         // o
                                                                                                                         // caminhao
                                                                                                                         // coletou
@@ -423,7 +430,7 @@ public class Simulacao {
                 caminhaoPequeno.estacao_atual != null &&
                 caminhaoPequeno.estacao_atual.fila_caminhao_pequeno.head != null &&
                 !caminhaoPequeno.estacao_atual.fila_caminhao_pequeno.estaVazia() &&
-                caminhaoPequeno == caminhaoPequeno.estacao_atual.fila_caminhao_pequeno.espiar()) {
+                caminhaoPequeno == caminhaoPequeno.estacao_atual.fila_caminhao_pequeno.espiar() && caminhaoPequeno.esta_trabalhando == true) {
 
                 if (caminhaoPequeno.estacao_atual.fila_caminhao_grande.estaVazia()) {
                     if (caminhaoPequeno.tempo_inicio_espera == 0) {
@@ -465,21 +472,29 @@ public class Simulacao {
 
     public void caminhaoPequenoVoltarColeta() {
         if (teresina.caminhoes_pequenos != null) {
-
             ListaEncadeada.No<CaminhaoPequeno> atual = teresina.caminhoes_pequenos.head;
-
+    
             while (atual != null) {
                 CaminhaoPequeno caminhaoPequeno = atual.dado;
-                if (caminhaoPequeno.coletou == false && caminhaoPequeno.vai_coletar
-                        && caminhaoPequeno.esta_na_zona == false && !caminhaoPequeno.esta_indo_pra_zona
-                        && caminhaoPequeno.zonas_de_atuacao.head != null) {
-                    if (caminhaoPequeno.zona_atual.lixo_atual != 0) {
-                        caminhaoPequeno.zona_a_ir = caminhaoPequeno.zona_atual;
-                        System.out.println(
-                                " [RETORNO A COLETA]  - Voltando para zona atual: "
-                                        + caminhaoPequeno.zona_atual.getNome() +
-                                        " (Lixo disponível: " + caminhaoPequeno.zona_atual.lixo_atual + " ton)");
+    
+                if (!caminhaoPequeno.coletou &&
+                    caminhaoPequeno.vai_coletar &&
+                    !caminhaoPequeno.esta_na_zona &&
+                    !caminhaoPequeno.esta_indo_pra_zona &&
+                    caminhaoPequeno.zonas_de_atuacao.head != null &&
+                    caminhaoPequeno.esta_trabalhando) {
+                    
+                    // SEMPRE ir para a próxima zona da fila (independente da atual)
+                    caminhaoPequeno.zonas_de_atuacao.desenfileirar();
+    
+                    if (caminhaoPequeno.zonas_de_atuacao.head != null) {
+                        caminhaoPequeno.zona_a_ir = caminhaoPequeno.zonas_de_atuacao.head.dado;
+    
+                        System.out.println(" [COLETA - NOVA ZONA] - Próxima zona na fila: "
+                                + caminhaoPequeno.zona_a_ir.getNome() + " (Lixo: "
+                                + caminhaoPequeno.zona_a_ir.lixo_atual + " ton)");
                         System.out.println(" ");
+    
                         if (teresina.estaEmHorarioPico()) {
                             caminhaoPequeno.tempo_viagem_volta = caminhaoPequeno.zona_a_ir.tempo_viagem_estacao_pico;
                             caminhaoPequeno.tempo_restante_viagem = caminhaoPequeno.zona_a_ir.tempo_viagem_estacao_pico;
@@ -487,44 +502,20 @@ public class Simulacao {
                             caminhaoPequeno.tempo_viagem_volta = caminhaoPequeno.zona_a_ir.tempo_viagem_estacao_normal;
                             caminhaoPequeno.tempo_restante_viagem = caminhaoPequeno.zona_a_ir.tempo_viagem_estacao_normal;
                         }
-
+    
                         caminhaoPequeno.esta_indo_pra_zona = true;
                         caminhaoPequeno.esta_na_estacao = false;
                         totalViagensPequenos++;
                         caminhaoPequeno.tempo_espera_acumulado = 0;
                         caminhaoPequeno.tempo_inicio_espera = 0;
-                        
-
-                    } else {
-                        caminhaoPequeno.zonas_de_atuacao.desenfileirar();
-                        if (caminhaoPequeno.zonas_de_atuacao.head != null) {
-                            caminhaoPequeno.zona_a_ir = caminhaoPequeno.zonas_de_atuacao.head.dado;
-                            System.out.println(" [RETORNO A COLETA - NOVA ZONA] - Próxima zona na fila: "
-                                    + caminhaoPequeno.zona_a_ir.getNome() + " (Lixo: "
-                                    + caminhaoPequeno.zona_a_ir.lixo_atual
-                                    + " ton)");
-                            System.out.println(" ");
-                            if (teresina.estaEmHorarioPico()) {
-                                caminhaoPequeno.tempo_viagem_volta = caminhaoPequeno.zona_a_ir.tempo_viagem_estacao_pico;
-                                caminhaoPequeno.tempo_restante_viagem = caminhaoPequeno.zona_a_ir.tempo_viagem_estacao_pico;
-                            } else {
-                                caminhaoPequeno.tempo_viagem_volta = caminhaoPequeno.zona_a_ir.tempo_viagem_estacao_normal;
-                                caminhaoPequeno.tempo_restante_viagem = caminhaoPequeno.zona_a_ir.tempo_viagem_estacao_normal;
-                            }
-
-                            caminhaoPequeno.esta_indo_pra_zona = true;
-                            caminhaoPequeno.esta_na_estacao = false;
-                            totalViagensPequenos++;
-                            caminhaoPequeno.tempo_espera_acumulado = 0;
-                            caminhaoPequeno.tempo_inicio_espera = 0;
-                        }
                     }
                 }
-
+    
                 atual = atual.prox;
             }
         }
-    } // acredito q ok
+    }
+    
 
     public void processarCaminhoesGrandes() {
         if (teresina.caminhoes_pequenos != null) {
@@ -535,10 +526,13 @@ public class Simulacao {
                 if (caminhao.esta_na_estacao && caminhao.estacao.fila_caminhao_grande.espiar() == caminhao) {
 
                     if (caminhao.estacao.fila_caminhao_pequeno.estaVazia()) {
-
-                        caminhao.tempo_espera_acumulado = minutosSimulados - caminhao.tempo_inicio_espera;
+                        if (caminhao.tempo_inicio_espera == 0) {
+                            caminhao.tempo_inicio_espera = minutosSimulados;
+                        } else {
+                            caminhao.tempo_espera_acumulado = minutosSimulados - caminhao.tempo_inicio_espera;
+                        }
                     }
-
+                    
                     if ((caminhao.tempo_espera_acumulado >= caminhao.tolerancia_minutos && caminhao.carga_atual > 0)
                             || caminhao.carga_atual >= caminhao.capacidade_maxima) {
                         caminhao.iniciarViagemAoAterro(teresina.estaEmHorarioPico());
@@ -575,7 +569,7 @@ public class Simulacao {
             CaminhaoPequeno caminhaoPequeno = atual.dado;
             if (caminhaoPequeno.estacao_atual != null &&
                     caminhaoPequeno.estacao_atual.fila_caminhao_pequeno != null &&
-                    !caminhaoPequeno.estacao_atual.fila_caminhao_pequeno.estaVazia()) {
+                    !caminhaoPequeno.estacao_atual.fila_caminhao_pequeno.estaVazia() && caminhaoPequeno.esta_trabalhando == true) {
 
                 if (caminhaoPequeno == caminhaoPequeno.estacao_atual.fila_caminhao_pequeno.espiar() &&
                         caminhaoPequeno.tempo_espera_acumulado >= caminhaoPequeno.tempo_max_espera && caminhaoPequeno.estacao_atual.fila_caminhao_grande.estaVazia() ) {
@@ -597,6 +591,8 @@ public class Simulacao {
 
                     caminhaoPequeno.tempo_inicio_espera = 0;
                     caminhaoPequeno.tempo_espera_acumulado = 0;
+                    novoCaminhao.tempo_espera_acumulado = 0;
+                    novoCaminhao.tempo_inicio_espera = minutosSimulados;
 
                 }
 
@@ -612,7 +608,7 @@ public class Simulacao {
             ListaEncadeada.No<CaminhaoPequeno> atual = teresina.caminhoes_pequenos.head;
             while (atual != null) {
                 CaminhaoPequeno caminhao = atual.dado;
-                if (caminhao.esta_na_estacao == false && caminhao.esta_na_zona == false) {
+                if (caminhao.esta_na_estacao == false && caminhao.esta_na_zona == false && caminhao.esta_trabalhando == true) {
 
                     if (caminhao.esta_indo_pra_estacao) {
                         if (caminhao.tempo_restante_viagem > 0) {
@@ -742,6 +738,8 @@ public class Simulacao {
 
         atual = atual.prox;
     }
+
+    
 }
     public void exibirEstatisticas() {
         // Exibe resumo da simulação
