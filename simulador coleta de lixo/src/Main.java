@@ -3,12 +3,12 @@ import javax.swing.SwingUtilities;
 public class Main {
     public static void main(String[] args) {
 
-        int qtdPequenos2 = 1;
-        int qtdPequenos4 = 1;
-        int qtdPequenos8 = 1;
+        int qtdPequenos2 = 0;
+        int qtdPequenos4 = 0;
+        int qtdPequenos8 = 0;
         int qtdPequenos10 = 1;
         int qtdGrandes = 2;
-        int qtdViagens = 1;
+        int qtdViagens = 2;
 
 
         Simulacao simulacao = new Simulacao(qtdPequenos2, qtdPequenos4, qtdPequenos8,

@@ -647,7 +647,6 @@ public class Simulacao {
                             caminhao.esta_coletando = true;
                             System.out.println("[CHEGOU-ZONA] Caminhão " + caminhao.id_caminhao_pequeno +
                                     " chegou na zona " + caminhao.zona_atual.getNome());
-                            totalViagensPequenos++;
                             caminhao.tempo_espera_acumulado = 0;
                                     caminhao.tempo_inicio_espera = 0;
 
