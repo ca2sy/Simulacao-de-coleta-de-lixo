@@ -24,7 +24,6 @@ public class Simulacao {
     public int totalLixoColetado = 0;
     public int totalViagensPequenos = 0;
     public int totalViagensGrandes = 0;
-    public int somaTemposEsperaPequenos = 0;
     public int totalLixoTransferido = 0;
     public int totalLixoDescarregado = 0;
     public int VELOCIDADE = 1000;
@@ -162,8 +161,8 @@ public class Simulacao {
 
             Zona z = new Zona(
                     "Zona " + i,
-                    120, // lixo_minimo 120 //pra teste por 82 toneladas ou 600?
-                    120, // lixo_maximo
+                    80,
+                    100, 
                     tempo_min_viagem_normal, // tempo_min_viagem_pico
                     tempo_max_viagem_normal, // tempo_max_viagem_pico
                     tempo_min_viagem_normal, // tempo_min_viagem_normal
@@ -438,7 +437,7 @@ public class Simulacao {
                     }
                     caminhaoPequeno.tempo_espera_acumulado = minutosSimulados - caminhaoPequeno.tempo_inicio_espera;
                 } else {
-                        somaTemposEsperaPequenos = somaTemposEsperaPequenos + caminhaoPequeno.tempo_espera_acumulado;
+                       
                         caminhaoPequeno.tempo_espera_acumulado = 0; // Reset se há caminhão grande
                         // aqui a coleta vai acontecer
                         CaminhaoGrande caminhaoGrande = caminhaoPequeno.estacao_atual.fila_caminhao_grande.espiar();
@@ -574,7 +573,7 @@ public class Simulacao {
                 if (caminhaoPequeno == caminhaoPequeno.estacao_atual.fila_caminhao_pequeno.espiar() &&
                         caminhaoPequeno.tempo_espera_acumulado >= caminhaoPequeno.tempo_max_espera && caminhaoPequeno.estacao_atual.fila_caminhao_grande.estaVazia() ) {
 
-                    somaTemposEsperaPequenos = somaTemposEsperaPequenos + caminhaoPequeno.tempo_espera_acumulado;
+                 
 
                     EstacaoTransferencia estacao = caminhaoPequeno.estacao_atual;
 
@@ -744,14 +743,8 @@ public class Simulacao {
         // Exibe resumo da simulação
         System.out.println("\n======== ESTATÍSTICAS DA SIMULAÇÃO ========");
 
-        double mediaEsperaPequenos = this.teresina.caminhoes_pequenos.tamanho > 0
-                ? (double) somaTemposEsperaPequenos / this.teresina.caminhoes_pequenos.tamanho
-                : 0;
 
         System.out.println("ESTATÍSTICAS GERAIS:");
-
-        System.out
-                .println("- Tempo médio de espera (pequenos): " + String.format("%.1f", mediaEsperaPequenos) + " min");
         System.out.println("- Caminhões grandes adicionados: " + totalCaminhoesGrandesAdicionados);
         System.out.println("- Lixo coletado total: " + totalLixoColetado + " ton");
         System.out.println("- Lixo transferido entre caminhões: " + totalLixoTransferido + " ton");

@@ -208,18 +208,10 @@ public class InterfaceSimulacao extends JFrame {
 
     private void atualizarEstatisticas() {
         statsPanel.removeAll();
-
-        double mediaEsperaPequenos = simulacao.teresina.caminhoes_pequenos.tamanho > 0
-                ? (double) simulacao.somaTemposEsperaPequenos / simulacao.teresina.caminhoes_pequenos.tamanho
-                : 0;
-
         // Adiciona todas as estatísticas
         statsPanel.add(new JLabel("Tempo de simulação:"));
         statsPanel.add(new JLabel(String.format("%02d:%02d",
                 simulacao.minutosSimulados / 60, simulacao.minutosSimulados % 60)));
-
-        statsPanel.add(new JLabel("Média espera pequenos:"));
-        statsPanel.add(new JLabel(String.format("%.1f min", mediaEsperaPequenos)));
 
         statsPanel.add(new JLabel("Caminhões grandes:"));
         statsPanel.add(new JLabel(simulacao.totalCaminhoesGrandesAdicionados + " adicionados"));
@@ -417,9 +409,7 @@ public class InterfaceSimulacao extends JFrame {
 
     private void mostrarEstatisticasCompletas() {
         // Cálculo das médias
-        double mediaEsperaPequenos = simulacao.teresina.caminhoes_pequenos.tamanho > 0
-                ? (double) simulacao.somaTemposEsperaPequenos / simulacao.teresina.caminhoes_pequenos.tamanho
-                : 0;
+
 
         StringBuilder stats = new StringBuilder();
         stats.append("\n=== ESTATÍSTICAS COMPLETAS ===\n");
@@ -427,8 +417,6 @@ public class InterfaceSimulacao extends JFrame {
         stats.append("Tempo de simulação: ")
                 .append(String.format("%02d:%02d", simulacao.minutosSimulados / 60, simulacao.minutosSimulados % 60))
                 .append("\n");
-
-        stats.append(String.format("- Tempo médio de espera (pequenos): %.1f min\n", mediaEsperaPequenos));
         stats.append("- Caminhões grandes adicionados: ").append(simulacao.totalCaminhoesGrandesAdicionados)
                 .append("\n");
         stats.append("- Lixo coletado total: ").append(simulacao.totalLixoColetado).append(" ton\n");

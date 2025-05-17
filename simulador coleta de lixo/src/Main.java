@@ -6,9 +6,9 @@ public class Main {
         int qtdPequenos2 = 0;
         int qtdPequenos4 = 0;
         int qtdPequenos8 = 0;
-        int qtdPequenos10 = 1;
+        int qtdPequenos10 = 2;
         int qtdGrandes = 2;
-        int qtdViagens = 2;
+        int qtdViagens = 3;
 
 
         Simulacao simulacao = new Simulacao(qtdPequenos2, qtdPequenos4, qtdPequenos8,
@@ -19,7 +19,7 @@ public class Main {
             simulacao.setInterface(interfaceSimulacao);
             interfaceSimulacao.setVisible(true);
         });
-
+ 
         // simulacao.executar();
     }
 }
