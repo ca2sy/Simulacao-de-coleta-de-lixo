@@ -26,6 +26,8 @@ public class Simulacao {
     public int totalViagensGrandes = 0;
     public int totalLixoTransferido = 0;
     public int totalLixoDescarregado = 0;
+
+    //velocidade que vai rodar a simulação 
     public int VELOCIDADE = 1000;
 
     // Construtor: define quantidade de cada tipo de caminhão, cria as estações, as
@@ -71,7 +73,7 @@ public class Simulacao {
 
                     teresina.avancarTempoEmMinutos(1); // 1 minuto
 
-                    // chamando meus metodos
+                    // chamando meus metodos da simulação
 
                     verificarCaminhoesPequenosEncerraram();
                     verificarCaminhoesPequenosComecando();
@@ -80,26 +82,10 @@ public class Simulacao {
                     processarCaminhoesPequenos();
                     adicionarCaminhaoGrande();
                     caminhaoPequenoVoltarColeta();
-                    processarCaminhoesGrandes(); // PROBLEMA AQU (TIMER NAO ANDA)
+                    processarCaminhoesGrandes(); 
                     CaminhoesChegamAoAterro();
                     atualizarMovimentoCaminhoesPequenos();
                     atualizarViagensAoAterro();
-
-                    // 1. verificar quais caminhões pequenos encerraram suas atividades (FEITO)
-                    // 2. verificar quais caminhões pequenos iniciam suas atividades (FEITO)
-                    // 3. caminhões pequenos que chegaram às suas zonas, precisam ser carregados
-                    // (FEITO)
-                    // 4. caminhões pequenos que precisam descarregar vão para as estações de
-                    // transferencia (FEITO)
-                    // 5. caminhões pequenos nas estações de transferência precisam descarregar
-                    // se for possível, descarrega, caso contrário, aguarda (processar a fila de
-                    // descarga de caminhões pequenos) (FEITO?)
-                    // 6. verificar os tempos de espera nas estações de transferência e decidir se é
-                    // o momento de adicionar um caminhão grande ou não (FEITO?)
-                    // 7. processar fila de caminhõe grandes nas estações de transferência (FEITO?)
-                    // 8. verificar quais camionhões grandes chegaram no aterro para descarregar
-                    // (feito?)
-                    // 9. atualiza o movimento de cada caminhão que está no mapa. (feito?)
 
                 }
             }
@@ -281,7 +267,7 @@ public class Simulacao {
         this.interfaceSimulacao = interfaceSimulacao;
     }
 
-    // REFAZER TUDO APARTIR DAQUI!!!!!!!!!!!
+
 
     // verificar quais caminhões pequenos encerraram suas atividades
     public void verificarCaminhoesPequenosEncerraram() {
@@ -311,7 +297,7 @@ public class Simulacao {
 
                 // caso o numero de viagens realizadas for 0, ele começa em uma zona. como
                 // teoricamente ele foi pra aquela zona de algum lugar, eu ja aumento aqui o
-                // numero de viagens.
+                // numero de viagens. pra começar, ele precisa estar no horario de começar
                 CaminhaoPequeno caminhao = atual.dado;
                 if (caminhao.num_viagens_realizadas == 0  && this.minutosSimulados  == caminhao.horario_inicio) {
                     System.out.println("[CAMINHÃO PEQUENO COMEÇANDO] Caminhão " + atual.dado.id_caminhao_pequeno
@@ -325,7 +311,7 @@ public class Simulacao {
                     caminhao.esta_na_zona = true; // como ele começou agora, ele esta na zona agora. é como se ele
                                                   // tivesse
                                                   // acabado de chegar
-                    caminhao.esta_trabalhando = true;
+                    caminhao.esta_trabalhando = true; 
                 }
                 atual = atual.prox;
             }
@@ -337,8 +323,7 @@ public class Simulacao {
     // na zona
     // Recolhe o que puder, sem ultrapassar o limite do caminhão
     // Atualizo os dados da zona e do caminhão e registro a coleta
-    // Por fim, desativo a coleta porque ele vai precisar descarregar antes de
-    // voltar
+    // Por fim, desativo a coleta
 
     public void caminhaoPequenoColeta() {
         if (teresina.caminhoes_pequenos != null) {

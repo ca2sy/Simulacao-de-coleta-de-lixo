@@ -1,6 +1,6 @@
 import javax.swing.SwingUtilities;
 
-public class Main {
+public class Main { //classe principal rodada, roda minha simulação com base no que passo no construtor 
     public static void main(String[] args) {
 
         int qtdPequenos2 = 0;
@@ -14,7 +14,7 @@ public class Main {
         Simulacao simulacao = new Simulacao(qtdPequenos2, qtdPequenos4, qtdPequenos8,
                 qtdPequenos10, qtdGrandes, qtdViagens);
 
-        SwingUtilities.invokeLater(() -> {
+        SwingUtilities.invokeLater(() -> { //chamo a interface aqui
             InterfaceSimulacao interfaceSimulacao = new InterfaceSimulacao(simulacao);
             simulacao.setInterface(interfaceSimulacao);
             interfaceSimulacao.setVisible(true);

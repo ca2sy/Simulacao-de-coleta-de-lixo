@@ -65,13 +65,6 @@ public class CaminhaoGrande {
         return estacao != null;
     }
 
-    // Métodos de controle de tempo
-
-    public boolean deveIrParaAterro() {
-        return (carga_atual == capacidade_maxima) ||
-                (tempo_espera_acumulado >= tolerancia_minutos && carga_atual > 0);
-    }
-
     // Métodos de carga/descarga
    
 

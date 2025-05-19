@@ -1,13 +1,13 @@
 public class EstacaoTransferencia {
-    // identificação
+    // identificação e localização (a estação tem que estar em uma zona)
     public String nome;
     public Zona localizacao;
 
-    // filas de caminhões
+    // filas de caminhões esperando para descarregar e receber, respectivamente
     public Fila<CaminhaoPequeno> fila_caminhao_pequeno;
     public Fila<CaminhaoGrande> fila_caminhao_grande;
 
-    // tempos de viagem da estação pro aterro
+    // tempos de viagem da estação pro aterro, dependendo do pico
     public int tempo_viagem_aterro_normal;
     public int tempo_viagem_aterro_pico;
 
@@ -23,18 +23,4 @@ public class EstacaoTransferencia {
         return nome;
     }
 
-    public void adicionarCaminhaoPequeno(CaminhaoPequeno caminhaoPequeno) {
-        fila_caminhao_pequeno.enfileirar(caminhaoPequeno);
-        System.out
-                .println("Caminhão " + caminhaoPequeno.getIdCaminhaoPequeno() + " chegou à estação de transferência.");
-    }
-
-    public void adicionarCaminhaoGrande(CaminhaoGrande caminhaoGrande) {
-        fila_caminhao_grande.enfileirar(caminhaoGrande);
-        System.out.println("Caminhão " + caminhaoGrande.getIdCaminhaoGrande() + " chegou à estação de transferência.");
-    }
-
-    public int getQuantidadeCaminhoes() {
-        return fila_caminhao_grande.getTamanho();
-    }
 }

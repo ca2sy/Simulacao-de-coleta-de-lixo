@@ -99,7 +99,5 @@ public class CaminhaoPequeno {
        
     }
 
-    public boolean tempoMaximoEsperado() {
-        return tempo_espera_acumulado >= tempo_max_espera;
-    }
+
 }

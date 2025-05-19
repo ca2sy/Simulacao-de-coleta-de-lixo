@@ -44,6 +44,8 @@ public class Cidade {
                 || (horaAtual >= horario_pico_inicio2 && horaAtual <= horario_pico_fim2);
     }
 
+    // métodos de impressão das coisas da cidade: 
+
     public void imprimeListaEstacoes() {
         ListaEncadeada.No<EstacaoTransferencia> atual = estacoes_transferencia.head;
         while (atual != null) {

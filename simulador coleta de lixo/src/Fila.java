@@ -1,5 +1,5 @@
 public class Fila<T> {
-    public static class No<T> {
+    public static class No<T> { //No 
         T dado;
         No<T> prox;
 
@@ -10,76 +10,61 @@ public class Fila<T> {
     }
 
    
-    public No<T> head;
-    public No<T> tail;
+    public No<T> head;// head é o que vai ser atendido
+    public No<T> tail; //tail é o ultimo da fila
     public int tamanho;
 
-    public Fila() {
+    public Fila() { //fila começa sem ninguem, head e tail null
         this.head = null;
         this.tail = null;
         this.tamanho = 0;
     }
 
-    public void enfileirar(T elemento) {
+    public void enfileirar(T elemento) { //adicionar alguem na fila, enqueue
         No<T> novoNo = new No<>(elemento);
-        if (estaVazia()) {
+        if (estaVazia()) { //se tiver vazia, o elemento que ta sendo adicioado vai ser o primeiro
             head = novoNo;
-        } else {
-            tail.prox = novoNo;
+        } else { 
+            tail.prox = novoNo; //se nao, ele vira o proximo do atual tail
         }
-        tail = novoNo;
-        tamanho++;
+        tail = novoNo; //de qualquer forma, o elemento vai ser o novo ultimo, mesmo se for o unico da fila
+        tamanho++; //o tamanho da fila aumenta
     }
 
-    public T desenfileirar() {
+    public T desenfileirar() { //remover, dequeue
         if (estaVazia()) {
-            throw new IllegalStateException("Fila vazia");
+            throw new IllegalStateException("Fila vazia"); //se a fila nao tiver ngm, ngm pode ser removido
         }
-        T elemento = head.dado;
-        head = head.prox;
-        if (head == null) {
+        T elemento = head.dado; // o elemento removido é o primeiro da vida, referenciamos ele para retorná-lo
+        head = head.prox; //o primeiro da fila vira o proximo
+        if (head == null) { //se a o head virar null, isso significa que era o unico da fila, então atualizamos o tail tbm
             tail = null;
         }
-        tamanho--;
-        return elemento;
+        tamanho--; //tamanho diminui
+        return elemento; //retorno quem foi tirado
     }
 
-    public T espiar() {
+    public T espiar() { //so pra ver o primeiro da fila e retornar ele, sem tirar da fila ainda
         if (estaVazia()) {
             throw new IllegalStateException("Fila vazia");
         }
         return head.dado;
     }
 
-    public boolean estaVazia() {
+    public boolean estaVazia() { //serve pra verificar se ta vazia
         return tamanho == 0;
     }
 
-    public String listaString() {
-        String r = "";
+    public String listaString() { //metodo de listar, eu atualizo ele la na cidade pra listar os componentes
+        String elemento = "";
         No<T> atual = this.head;
         while (atual != null) {
-            r = r + " >> " + atual.dado.toString();
+            elemento = elemento + " >> " + atual.dado.toString();
             atual = atual.prox;
         }
 
-        return r;
+        return elemento;
 
-    }
-
-    public int getTamanho() {
-        return tamanho;
-    }
-
-    public boolean contem(T elemento) {
-        No<T> atual = head;
-        while (atual != null) {
-            if (atual.dado.equals(elemento)) {
-                return true;
-            }
-            atual = atual.prox;
-        }
-        return false;
     }
 
 }
